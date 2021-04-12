@@ -1,9 +1,7 @@
-import { default as mongodb } from 'mongodb';
-import { Question } from '../classes/Question.js';
-const Db = mongodb.Db;
-const ObjectID = mongodb.ObjectID;
+const { Db, ObjectID } = require("mongodb");
+const Question = require('../classes/Question');
 
-export const questions = (app, db) => {
+const questions = (app, db) => {
     if (!(db instanceof Db)) {
         throw new Error("Invalid Database");
     }
@@ -27,8 +25,10 @@ export const questions = (app, db) => {
         return res.json(reponse.ops[0]);
     })
 
-    app.get("/questions/all", async (req, res) => {
+    app.get("/api/questions/all", async (req, res) => {
         const reponse = await questionClass.getAllQuestions();
         return res.json(reponse);
     })
 }
+
+module.exports = questions;

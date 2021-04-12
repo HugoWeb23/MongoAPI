@@ -1,4 +1,4 @@
-export const themeConstraints = async (db) => {
+const themeConstraints = async (db) => {
     const collectionName = "themes";
     const existingCollections = await db.listCollections().toArray();
     if (existingCollections.some(c => c.name === collectionName)) {
@@ -20,3 +20,5 @@ export const themeConstraints = async (db) => {
         },
     });
 };
+
+module.exports = themeConstraints;

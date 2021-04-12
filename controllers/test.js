@@ -1,16 +1,14 @@
-import { default as mongodb } from 'mongodb';
-const Db = mongodb.Db;
-const ObjectID = mongodb.ObjectID;
-import { User } from '../classes/User.js';
+const { Db, ObjectID } = require("mongodb");
+const Test = require('../classes/Test');
 
-export const users = (app, db) => {
+const test = (app, db) => {
   if (!(db instanceof Db)) {
     throw new Error("Invalid Database");
   }
   const userCollection = db.collection("users");
-  const UserClass = new User(db);
+  const TestClass = new Test(db);
 
-  app.post("/users", async (req, res) => {
+  app.post("/test", async (req, res) => {
     const data = req.body;
     try {
       data.active = data.active === 'true';
@@ -40,13 +38,13 @@ export const users = (app, db) => {
   });
 
   // lister tous les utilisateurs
-  app.get("/users", async (req, res) => {
+  app.get("/test", async (req, res) => {
     const users = await userCollection.find().toArray();
     res.json(users);
   });
 
   // lister un utilisateeur
-  app.get("/users/:userId", async (req, res) => {
+  app.get("/test/:userId", async (req, res) => {
     const { userId } = req.params;
     const _id = new ObjectID(userId);
     const user = await userCollection.findOne({ _id });
@@ -57,7 +55,7 @@ export const users = (app, db) => {
   });
 
   // Mettre à jour un utilisateur
-  app.post("/users/:userId", async (req, res) => {
+  app.post("/test/:userId", async (req, res) => {
     const { userId } = req.params;
     const data = req.body;
     data.birthday = new Date(data.birthday)
@@ -91,7 +89,7 @@ export const users = (app, db) => {
   });
 
   // Supprimer un utilisateur
-  app.delete("/users/:userId", async (req, res) => {
+  app.delete("/test/:userId", async (req, res) => {
     const { userId } = req.params;
     const _id = new ObjectID(userId);
     const response = await userCollection.findOneAndDelete({ _id });
@@ -103,7 +101,7 @@ export const users = (app, db) => {
   });
 
   //ajouter une adresse
-  app.post("/users/:userId/addresses", async (req, res) => {
+  app.post("/test/:userId/addresses", async (req, res) => {
     const { userId } = req.params;
     const { street, number, city, zipCode } = req.body;
     const _id = new ObjectID(userId);
@@ -132,7 +130,7 @@ export const users = (app, db) => {
   });
 
   // Supprimer une adresse
-  app.delete("/users/:userId/addresses/:addressId", async (req, res) => {
+  app.delete("/test/:userId/addresses/:addressId", async (req, res) => {
     const { userId, addressId } = req.params;
     const _id = new ObjectID(userId);
     const _addressId = new ObjectID(addressId);
@@ -154,7 +152,7 @@ export const users = (app, db) => {
 
 
   // Modifier une adresse
-  app.post("/users/:userId/addresses/:addressId", async (req, res) => {
+  app.post("/test/:userId/addresses/:addressId", async (req, res) => {
     const { userId, addressId } = req.params;
     const { street, number, city } = req.body;
     const _id = new ObjectID(userId);
@@ -182,7 +180,7 @@ export const users = (app, db) => {
 
 
   // Récuperation de toutes les adresses
-  app.get("/users/:userId/addresses", async (req, res) => {
+  app.get("/test/:userId/addresses", async (req, res) => {
     const { userId } = req.params;
 
     const addresses = await userCollection.aggregate([
@@ -204,3 +202,5 @@ export const users = (app, db) => {
     res.json(addresses);
   });
 };
+
+module.exports = test;

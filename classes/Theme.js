@@ -1,8 +1,7 @@
-import { default as mongodb } from 'mongodb';
-const ObjectID = mongodb.ObjectID;
+const { ObjectId } = require('mongodb');
 
 
-export class Theme {
+class Theme {
     constructor(db) {
         this.db = db;
         this.themeCollection = this.db.collection('themes');
@@ -18,3 +17,5 @@ export class Theme {
         return result;
     }
 }
+
+module.exports = Theme;

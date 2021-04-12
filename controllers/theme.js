@@ -1,9 +1,7 @@
-import { default as mongodb } from 'mongodb';
-import { Theme } from '../classes/Theme.js';
-const Db = mongodb.Db;
-const ObjectID = mongodb.ObjectID;
+const { Db, ObjectID } = require("mongodb");
+const Theme = require('../classes/Theme');
 
-export const themes = (app, db) => {
+const themes = (app, db) => {
     if (!(db instanceof Db)) {
         throw new Error("Invalid Database");
     }
@@ -24,3 +22,5 @@ export const themes = (app, db) => {
         return res.json(reponse);
     })
 }
+
+module.exports = themes;

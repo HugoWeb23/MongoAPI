@@ -1,4 +1,4 @@
-export const questionConstraints = async (db) => {
+const questionConstraints = async (db) => {
     const collectionName = "questions";
     const existingCollections = await db.listCollections().toArray();
     if (existingCollections.some(c => c.name === collectionName)) {
@@ -53,3 +53,5 @@ export const questionConstraints = async (db) => {
         },
     });
 };
+
+module.exports = questionConstraints;

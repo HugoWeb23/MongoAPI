@@ -1,22 +1,32 @@
-import express from 'express';
-import { getDb } from './database/connexion.js';
+const express = require('express');
+const getDb = require('./database/connexion');
 
 // Controllers
-import { users } from './controllers/users.js';
-import { questions } from './controllers/question.js'
-import { themes } from './controllers/theme.js';
+const test = require('./controllers/test');
+const questions = require('./controllers/question');
+const themes = require('./controllers/theme');
+const users = require('./controllers/user');
+const { myPassportLocal, myPassportJWT } = require('./passport');
+const passport = require('passport');
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 (async () => {
+    app.use('^/api', passport.authenticate('jwt', { session: false }))
     const db = await getDb();
 
-    users(app, db);
+    myPassportLocal(db);
+    myPassportJWT(db);
+
+    test(app, db);
     questions(app, db);
     themes(app, db);
+    users(app, db);
 
     app.listen(port, () => {
         console.log(`Application lancée sur le port: ${port}`)

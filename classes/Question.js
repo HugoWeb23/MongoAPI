@@ -1,8 +1,6 @@
-import { default as mongodb } from 'mongodb';
-const ObjectID = mongodb.ObjectID;
+const { ObjectId } = require('mongodb');
 
-
-export class Question {
+class Question {
     constructor(db) {
         this.db = db;
         this.questionCollection = this.db.collection('questions');
@@ -31,3 +29,5 @@ export class Question {
         return result;
     }
 }
+
+module.exports = Question;

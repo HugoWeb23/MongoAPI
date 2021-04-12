@@ -1,15 +1,16 @@
-import { default as mongodb } from 'mongodb';
-const ObjectID = mongodb.ObjectID;
+const { ObjectId } = require('mongodb');
 
-export class User {
+class User {
     constructor(db) {
         this.db = db;
-        this.userCollection = this.db.collection("users");
+        this.userCollection = this.db.collection('utilisateurs');
     }
 
-    async fetchUser(id_user) {
-        let _id = new ObjectID(id_user);
-        const user = await this.userCollection.findOne({ _id });
+    async createUser(data) {
+        const user = await this.userCollection.insertOne(data);
         return user;
     }
+
 }
+
+module.exports = User;
