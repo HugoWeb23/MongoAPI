@@ -8,7 +8,7 @@ const themes = (app, db) => {
 
     const themeClass = new Theme(db);
 
-    app.post("/themes/new", async (req, res) => {
+    app.post("/api/themes/new", async (req, res) => {
         const data = req.body;
         const reponse = await themeClass.createTheme(data);
         if (reponse.result.n !== 1 && reponse.result.ok !== 1) {
@@ -17,7 +17,7 @@ const themes = (app, db) => {
         return res.json(reponse.ops[0]);
     })
 
-    app.get("/themes/all", async (req, res) => {
+    app.get("/api/themes/all", async (req, res) => {
         const reponse = await themeClass.getAllThemes();
         return res.json(reponse);
     })

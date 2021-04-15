@@ -12,25 +12,18 @@ const users = (app, db) => {
 
     const userClass = new User(db);
 
-    app.post("/users/new", async (req, res) => {
+    app.post("/register", async (req, res) => {
         const data = req.body;
         data.pass = await bcrypt.hash(data.pass, 10);
         data.admin = data.admin === "true";
         const reponse = await userClass.createUser(data);
+        const user = reponse.ops[0]
         const token = jwt.sign({ id: reponse.ops[0]._id }, process.env.secretKey, {
-            expiresIn: 8000 // expires in 24 hours
+            expiresIn: 432000
         });
-        return res.json({ auth: true, token: token });
-    })
-
-    app.get("/users/me", (req, res) => {
-        const token = req.headers['x-access-token'];
-        if (!token) return res.status(401).send({ auth: false, message: 'No token provided.' });
-
-        jwt.verify(token, "supersecret", function (err, decoded) {
-            if (err) return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
-            res.status(200).send(decoded);
-        });
+        user.token = token
+        delete user.pass
+        return res.json(user);
     })
 
     app.post('/login', async (req, res) => {
@@ -45,10 +38,10 @@ const users = (app, db) => {
                 }
                 delete user.pass;
                 const token = jwt.sign(user, process.env.secretKey, {
-                    expiresIn: 8000
+                    expiresIn: 432000
                 });
-
-                return res.json({ user, token })
+                user.token = token
+                return res.json(user)
             })
         })(req, res)
     })

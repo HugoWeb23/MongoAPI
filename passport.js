@@ -10,14 +10,13 @@ const { Db, ObjectID } = require("mongodb");
 const myPassportLocal = (db) => {
     const userCollection = db.collection('utilisateurs');
     passport.use(new LocalStrategy({
-        usernameField: 'prenom',
+        usernameField: 'email',
         passwordField: 'pass'
-    }, async (prenom, pass, cb) => {
+    }, async (email, pass, cb) => {
         try {
-            const user = await userCollection.findOne({ prenom })
+            const user = await userCollection.findOne({ email })
             if (user && await bcrypt.compare(pass, user.pass)) {
                 return cb(null, user)
-
             } else {
                 return cb(null, false)
             }
@@ -33,10 +32,8 @@ const myPassportJWT = (db) => {
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: process.env.secretKey
         }, async (jwtPayLoad, cb) => {
-            const userCollection = db.collection('utilisateurs');
-            const user = await userCollection.findOne({ _id: new ObjectID(jwtPayLoad._id) })
-            if (user) {
-                return cb(null, user);
+            if (jwtPayLoad) {
+                return cb(null, jwtPayLoad);
             } else {
                 return cb(null, false);
             }

@@ -9,7 +9,7 @@ const userConstraints = async (db) => {
         validator: {
             $jsonSchema: {
                 bsonType: "object",
-                required: ["nom", "prenom", "pass", "admin"],
+                required: ["nom", "prenom", "email", "pass", "admin"],
                 properties: {
                     nom: {
                         bsonType: ["string"],
@@ -18,6 +18,10 @@ const userConstraints = async (db) => {
                     prenom: {
                         bsonType: ["string"],
                         description: "Prénom de l'utilisateur",
+                    },
+                    email: {
+                        bsonType: ["string"],
+                        description: "Adresse email de l'utilisateur",
                     },
                     pass: {
                         bsonType: ["string"],
