@@ -50,9 +50,6 @@ class Question {
 
     async checkReply(data) {
         data.id_question = ObjectID(data.id_question);
-        if (!ObjectID.isValid(data.id_question)) {
-            throw "Le format de la question n'est pas"
-        }
         if (data.type === 1) {
             const question = await this.questionCollection.findOne({ _id: data.id_question });
             if (question === null) {
@@ -67,9 +64,6 @@ class Question {
             ]).toArray()
             if (question === null) {
                 throw "La question n'existe pas"
-            }
-            if (!ObjectID.isValid(data.reponse)) {
-                throw "Le format de la réponse n'est pas correct"
             }
             // Récupère la proposition correcte dans le tableau des propositions
             const correctProposition = question[0].propositions.filter(i => i.correcte === true);

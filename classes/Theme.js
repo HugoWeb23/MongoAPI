@@ -16,6 +16,21 @@ class Theme {
         const result = await this.themeCollection.find().toArray();
         return result;
     }
+
+    async editTheme(theme, data) {
+        const { value } = await this.themeCollection.findOneAndUpdate({
+            _id: theme
+        },
+            {
+                $set: {
+                    'theme': data
+                }
+            },
+            {
+                returnOriginal: false
+            })
+        return value
+    }
 }
 
 module.exports = Theme;

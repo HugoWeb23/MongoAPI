@@ -4,6 +4,17 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const dotenv = require('dotenv');
+const { addCustomMessages, Validator } = require('node-input-validator');
+
+addCustomMessages({
+    'nom.required': "Veuillez saisir un nom",
+    'prenom.required': "Veuillez saisir un prénom",
+    'email.required': "Veuillez saisir une adresse e-mail",
+    'email.email': "L'adresse e-mail n'est pas valide",
+    'admin.required': "Le grade de l'utilisateur est obligatoire",
+    'admin.boolean': "Le grade de l'utilisateur n'est pas valide",
+    'admin.pass': "Veuillez saisir un mot de passe"
+})
 
 const users = (app, db) => {
     if (!(db instanceof Db)) {
@@ -14,6 +25,21 @@ const users = (app, db) => {
 
     app.post("/register", async (req, res) => {
         const data = req.body;
+
+        const v = new Validator(data, {
+            nom: 'required|string',
+            prenom: 'required|string',
+            email: 'required|email',
+            admin: 'required|boolean',
+            pass: 'required|string'
+        })
+
+        const matched = await v.check();
+
+        if (!matched) {
+            return res.json(v.errors);
+        }
+
         data.pass = await bcrypt.hash(data.pass, 10);
         data.admin = data.admin === "true";
         const reponse = await userClass.createUser(data);
