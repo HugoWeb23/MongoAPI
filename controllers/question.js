@@ -12,7 +12,10 @@ addCustomMessages({
     'checkResponseType': "La réponse doit être un ObjectID valide",
     'propositions.requiredIf': "Veuillez saisir au moins une proposition",
     'propositions.array': "Le format des propositions n'est pas valide",
-    'reponse.requiredIf': "Veuillez saisir une réponse"
+    'reponse.requiredIf': "Veuillez saisir une réponse",
+    'types.array': "Le ou les types de questions à chercher doivent être passés dans un tableau",
+    'types.*.integer': "Les types de questions ne sont pas valides",
+    'themes.array': "Le ou les types de thèmes à chercher doivent être passés dans un tableau"
 })
 
 // Vérifie si un ObjectID est valide
@@ -59,6 +62,7 @@ const questions = (app, db) => {
                 return temp;
             })
         }
+        console.log(data)
         const reponse = await questionClass.createQuestion(data);
         if (reponse.result.n !== 1 && reponse.result.ok !== 1) {
             return res.json({ type: "erreur", message: "Erreur lors de la création de la question" })
@@ -122,6 +126,33 @@ const questions = (app, db) => {
             return res.json({ erreur: e });
         }
 
+    })
+
+    // Récupérer des questions en fonction des paramètres fournis
+    /**
+     * Les éléments de recherches :
+     * types: un tableau de types de questions à chercher
+     * themes: un tableau de thèmes de question à chercher
+     */
+
+    app.post('/api/questions/get', async (req, res) => {
+       const data = req.body;
+       const v = new Validator(data, {
+        types: 'array', // Tableau de types a chercher
+        'types.*': 'integer',
+        themes: 'array', // Tableau de thèmes a chercher
+        'themes.*': 'checkObjectid'
+    })
+    const matched = await v.check();
+
+    if (!matched) {
+        return res.status(400).json(v.errors);
+    }
+    data.types ? data.types = data.types.map(i => parseInt(i, 10)) : null;
+    data.themes ? data.themes = data.themes.map(t => new ObjectID(t)) : null;
+    console.log(data);
+        const questions = await questionClass.getRandomQuestions(data);
+        return res.json(questions);
     })
 }
 

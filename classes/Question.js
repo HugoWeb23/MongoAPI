@@ -71,6 +71,34 @@ class Question {
             return ObjectID(data.reponse).equals(correctProposition[0]._id)
         }
     }
+
+    /**
+     * @param {Object} data
+     */
+    async getRandomQuestions(data = {}) {
+        const rules = [
+            { $sample: { size: 6 } },
+            { $lookup: {
+                    from: "themes",
+                    localField: "themeId",
+                    foreignField: "_id",
+                    as: "theme"
+                }
+            },
+            { $unwind: '$theme' },
+            { $project: { themeId: 0 } }
+        ];
+            let search = {}
+            // Si le tableau de types à rechercher contient au moins une valeur, on l'ajoute dans l'objet search
+            data.types ? search['type'] = {$in: data.types} : null; 
+            // Si le tableau de thèmes à rechercher contient au moins une valeur, on l'ajoute dans l'objet search
+            data.themes ? search['themeId'] = {$in: data.themes} : null;
+            // Si l'objet search n'est pas vide, on ajoute la propriété match dans l'aggregate en lui passant search
+            Object.keys(search).length > 0 ? rules.unshift({$match: search}) : null;
+     
+        const questions = await this.questionCollection.aggregate(rules).toArray();
+        return questions;
+    }
 }
 
 module.exports = Question;
