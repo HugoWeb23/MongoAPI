@@ -4,6 +4,7 @@ const testConstraints = require('../constraints/testConstraints');
 const questionConstraints = require('../constraints/questionConstraints');
 const themeConstraints = require('../constraints/themeConstraints');
 const userConstraints = require('../constraints/userConstraints');
+const partConstraints = require('../constraints/partConstraints');
 
 dotenv.config();
 const prod = process.env.prodURL;
@@ -23,6 +24,7 @@ const getDb = async () => {
     await questionConstraints(db);
     await themeConstraints(db);
     await userConstraints(db);
+    await partConstraints(db);
   } catch (error) {
     console.error(error);
   }

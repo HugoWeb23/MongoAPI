@@ -10,6 +10,7 @@ addCustomMessages({
     'themeId.required': "Veuillez saisir un thème",
     'checkObjectid': "Le format de l'ObjectID n'est pas valide",
     'checkResponseType': "La réponse doit être un ObjectID valide",
+    'question.required': "Veuillez saisir une question",
     'propositions.requiredIf': "Veuillez saisir au moins une proposition",
     'propositions.array': "Le format des propositions n'est pas valide",
     'reponse.requiredIf': "Veuillez saisir une réponse",
@@ -54,7 +55,7 @@ const questions = (app, db) => {
 
         data.type = parseInt(data.type, 10);
         data.themeId = new ObjectID(data.themeId);
-        if (data.propositions > 0) {
+        if(data.propositions) {
             data.propositions = data.propositions.map(i => {
                 let temp = Object.assign({}, i);
                 temp.correcte = temp.correcte === "true";
@@ -62,7 +63,7 @@ const questions = (app, db) => {
                 return temp;
             })
         }
-        console.log(data)
+    
         const reponse = await questionClass.createQuestion(data);
         if (reponse.result.n !== 1 && reponse.result.ok !== 1) {
             return res.json({ type: "erreur", message: "Erreur lors de la création de la question" })
@@ -107,6 +108,7 @@ const questions = (app, db) => {
     app.post('/api/questions/checkreply', async (req, res) => {
         const data = req.body;
         const v = new Validator(data, {
+            id_part: 'required|string|checkObjectid', // checkObjectid: vérifie si un ObjectID est valide
             id_question: 'required|string|checkObjectid', // checkObjectid: vérifie si un ObjectID est valide
             type: 'required|integer',
             reponse: 'required|string|checkResponseType:type' // Vérifie que la réponse est un ObjectID si le type est égal à 2
@@ -126,33 +128,6 @@ const questions = (app, db) => {
             return res.json({ erreur: e });
         }
 
-    })
-
-    // Récupérer des questions en fonction des paramètres fournis
-    /**
-     * Les éléments de recherches :
-     * types: un tableau de types de questions à chercher
-     * themes: un tableau de thèmes de question à chercher
-     */
-
-    app.post('/api/questions/get', async (req, res) => {
-       const data = req.body;
-       const v = new Validator(data, {
-        types: 'array', // Tableau de types a chercher
-        'types.*': 'integer',
-        themes: 'array', // Tableau de thèmes a chercher
-        'themes.*': 'checkObjectid'
-    })
-    const matched = await v.check();
-
-    if (!matched) {
-        return res.status(400).json(v.errors);
-    }
-    data.types ? data.types = data.types.map(i => parseInt(i, 10)) : null;
-    data.themes ? data.themes = data.themes.map(t => new ObjectID(t)) : null;
-    console.log(data);
-        const questions = await questionClass.getRandomQuestions(data);
-        return res.json(questions);
     })
 }
 

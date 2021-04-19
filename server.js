@@ -6,6 +6,7 @@ const test = require('./controllers/test');
 const questions = require('./controllers/question');
 const themes = require('./controllers/theme');
 const users = require('./controllers/user');
+const part = require('./controllers/part');
 const { myPassportLocal, myPassportJWT } = require('./passport');
 const passport = require('passport');
 const cors = require('cors');
@@ -27,6 +28,7 @@ app.use(cors());
     questions(app, db);
     themes(app, db);
     users(app, db);
+    part(app, db);
 
     app.listen(port, () => {
         console.log(`Application lancée sur le port: ${port}`)

@@ -1,9 +1,11 @@
 const { ObjectId, ObjectID } = require('mongodb');
+const Part = require('../classes/part');
 
 class Question {
     constructor(db) {
         this.db = db;
         this.questionCollection = this.db.collection('questions');
+        this.partClasse = new Part(this.db);
     }
 
     async createQuestion(data) {
@@ -56,6 +58,9 @@ class Question {
                 throw "La question n'existe pas"
             }
             const reponse = question.reponse
+            data.correcte = data.reponse === reponse;
+            // Enregistrement de la réponse dans la partie
+            await this.partClasse.updatePart(data);
             return data.reponse === reponse;
         } else if (data.type === 2) {
             const question = await this.questionCollection.aggregate([
@@ -68,6 +73,10 @@ class Question {
             // Récupère la proposition correcte dans le tableau des propositions
             const correctProposition = question[0].propositions.filter(i => i.correcte === true);
             // Détermine si l'ObjectID passé en réponse correpond à l'ObjectID de la proposition correcte
+            data.correcte = ObjectID(data.reponse).equals(correctProposition[0]._id);
+            data.reponse = new ObjectID(data.reponse);
+             // Enregistrement de la réponse dans la partie
+            await this.partClasse.updatePart(data);
             return ObjectID(data.reponse).equals(correctProposition[0]._id)
         }
     }
@@ -75,9 +84,8 @@ class Question {
     /**
      * @param {Object} data
      */
-    async getRandomQuestions(data = {}) {
+    async getQuestions(data = {}) {
         const rules = [
-            { $sample: { size: 6 } },
             { $lookup: {
                     from: "themes",
                     localField: "themeId",
@@ -86,15 +94,20 @@ class Question {
                 }
             },
             { $unwind: '$theme' },
-            { $project: { themeId: 0 } }
+            { $project: { themeId: 0, reponse: 0, 'propositions.correcte': 0 } }
         ];
             let search = {}
             // Si le tableau de types à rechercher contient au moins une valeur, on l'ajoute dans l'objet search
             data.types ? search['type'] = {$in: data.types} : null; 
             // Si le tableau de thèmes à rechercher contient au moins une valeur, on l'ajoute dans l'objet search
             data.themes ? search['themeId'] = {$in: data.themes} : null;
-            // Si l'objet search n'est pas vide, on ajoute la propriété match dans l'aggregate en lui passant search
+            data.questions ? search['_id'] = {$in: data.questions} : null;
+            // Si l'objet search n'est pas vide, on ajoute la propriété match dans l'aggregate en lui passant l'objet search
             Object.keys(search).length > 0 ? rules.unshift({$match: search}) : null;
+
+            data.limit ? rules.splice(1, 0, {$limit: data.limit}) : null;
+            // Si random vaut true, on sélectionne les documents de façon aléatoire, avec une limite définie par data.limit, ou 9999 si aucune limite n'est fournie
+            data.random == 'true' ? rules.splice(2, 0, {$sample: {size: data.limit || 9999}}) : null;
      
         const questions = await this.questionCollection.aggregate(rules).toArray();
         return questions;
