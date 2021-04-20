@@ -21,8 +21,8 @@ const getDb = async () => {
     });
     db = client.db(dbName);
     await testConstraints(db);
-    await questionConstraints(db);
     await themeConstraints(db);
+    await questionConstraints(db);
     await userConstraints(db);
     await partConstraints(db);
   } catch (error) {

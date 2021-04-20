@@ -1,3 +1,4 @@
+const defaultQuestions = require('../data/questionsData');
 const questionConstraints = async (db) => {
     const collectionName = "questions";
     const existingCollections = await db.listCollections().toArray();
@@ -52,6 +53,8 @@ const questionConstraints = async (db) => {
             },
         },
     });
+    // Insertion des questions par défaut
+    db.collection(collectionName).insertMany(defaultQuestions);
 };
 
 module.exports = questionConstraints;
