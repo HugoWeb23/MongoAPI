@@ -9,7 +9,7 @@ const partConstraints = require('../constraints/partConstraints');
 dotenv.config();
 const prod = process.env.prodURL;
 const dev = "mongodb://localhost:27033"
-const isProduction = false;
+const isProduction = true;
 const dbName = "hugo";
 
 const getDb = async () => {
