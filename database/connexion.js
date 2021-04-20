@@ -8,7 +8,7 @@ const partConstraints = require('../constraints/partConstraints');
 
 dotenv.config();
 const prod = process.env.prodURL;
-const dev = "mongodb://localhost:27017"
+const dev = "mongodb://localhost:27033"
 const isProduction = false;
 const dbName = "hugo";
 

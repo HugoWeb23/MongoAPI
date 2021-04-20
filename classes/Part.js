@@ -7,11 +7,12 @@ module.exports = class Part {
     }
 
     async createPart(data) {
-        this.partCollection.insertOne({
+        const part = this.partCollection.insertOne({
             userId: new ObjectID("6078708a55d5264ae8c62aac"),
             date: new Date(),
             questions: data
         })
+        return part;
     }
 
     async updatePart(data) {

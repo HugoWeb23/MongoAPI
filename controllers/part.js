@@ -49,7 +49,7 @@ const partClass = new Part(db);
             }
             questionsArray.push(question)
         })
-         await partClass.createPart(questionsArray);
+         const part = await partClass.createPart(questionsArray);
          return res.json(questions);
      })
     }

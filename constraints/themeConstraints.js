@@ -1,3 +1,4 @@
+const defaultThemes = require('../data/themesData');
 const themeConstraints = async (db) => {
     const collectionName = "themes";
     const existingCollections = await db.listCollections().toArray();
@@ -19,6 +20,8 @@ const themeConstraints = async (db) => {
             },
         },
     });
+     // Insertion des thèmes par défaut
+     db.collection(collectionName).insertMany(defaultThemes);
 };
 
 module.exports = themeConstraints;

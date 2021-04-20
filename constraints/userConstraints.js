@@ -1,3 +1,4 @@
+const defaultUsers = require('../data/userData');
 const userConstraints = async (db) => {
     const collectionName = "utilisateurs";
     const existingCollections = await db.listCollections().toArray();
@@ -35,6 +36,8 @@ const userConstraints = async (db) => {
             },
         },
     });
+     // Insertion des utilisateurs par défaut
+     db.collection(collectionName).insertMany(defaultUsers);
 };
 
 module.exports = userConstraints;
