@@ -1,5 +1,5 @@
 const { ObjectId, ObjectID } = require('mongodb');
-const Part = require('../classes/part');
+const Part = require('../classes/Part');
 
 class Question {
     constructor(db) {
