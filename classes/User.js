@@ -11,6 +11,23 @@ class User {
         return user;
     }
 
+    async updateUser(data) {
+        const {_id, nom, prenom, email, admin, pass} = data;
+        const updateValues = { nom, prenom, email, admin }
+        pass ? updateValues.pass = pass : null;
+        const value = await this.userCollection.findOneAndUpdate({
+            _id
+        },
+        {
+            $set: updateValues
+        },
+        {
+            projection: {"pass": 0},
+            returnOriginal: false
+        })
+        return value;
+    }
+
 }
 
 module.exports = User;
