@@ -18,7 +18,7 @@ const partClass = new Part(db);
      * themes: un tableau de thèmes de question à chercher
      */
 
-     app.post('/api/partie/new', async (req, res) => {
+     app.post('/api/part/new', async (req, res) => {
         const data = req.body;
         const v = new Validator(data, {
          types: 'array', // Tableau de types a chercher
@@ -51,6 +51,23 @@ const partClass = new Part(db);
         })
          const part = await partClass.createPart(questionsArray);
          return res.json(questions);
+     })
+
+     app.delete('/api/part/:_id', async(req, res) => {
+         const data = req.params;
+         const v = new Validator(data, {
+          _id: 'required|checkObjectid',
+      })
+      const matched = await v.check();
+  
+      if (!matched) {
+          return res.status(400).json(v.errors);
+      }
+      const part = await partClass.deletePart(data._id);
+      if(part.result.n != 1) {
+          return res.status(400).json({type: 'error', message: "La partie n'existe pas"})
+      }
+      return res.status(200).json({type: 'success', message: "La partie a été supprimée"})
      })
     }
 

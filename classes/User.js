@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb');
+const { ObjectId, ObjectID } = require('mongodb');
 
 class User {
     constructor(db) {
@@ -16,7 +16,7 @@ class User {
         const updateValues = { nom, prenom, email, admin }
         pass ? updateValues.pass = pass : null;
         const value = await this.userCollection.findOneAndUpdate({
-            _id
+            _id: ObjectID(_id)
         },
         {
             $set: updateValues

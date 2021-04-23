@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb');
+const { ObjectId, ObjectID } = require('mongodb');
 
 
 class Theme {
@@ -19,7 +19,7 @@ class Theme {
 
     async editTheme(theme, data) {
         const { value } = await this.themeCollection.findOneAndUpdate({
-            _id: theme
+            _id: ObjectID(theme)
         },
             {
                 $set: {
@@ -30,6 +30,13 @@ class Theme {
                 returnOriginal: false
             })
         return value
+    }
+
+    async deleteTheme(_id) {
+        const theme = await this.themeCollection.deleteOne({
+            _id: ObjectID(_id)
+        })
+        return theme;
     }
 }
 

@@ -102,7 +102,6 @@ extend('checkObjectid', ({ value }, validator) => {
             return res.json(v.errors);
         }
         data.pass ? data.pass = await bcrypt.hash(data.pass, 10) : null;
-        data._id = new ObjectId(data._id);
         data.admin = data.admin === "true";
         const {lastErrorObject, value} = await userClass.updateUser(data);
         if(lastErrorObject.n != 1) {

@@ -32,9 +32,8 @@ class Question {
     }
 
     async getAllQuestionsByTheme(theme) {
-        const themeID = ObjectID(theme);
         const result = await this.questionCollection.aggregate([
-            { $match: { themeId: themeID } },
+            { $match: { themeId: ObjectID(theme) } },
             {
                 $lookup:
                 {
@@ -51,7 +50,6 @@ class Question {
     }
 
     async checkReply(data) {
-        data.id_question = ObjectID(data.id_question);
         if (data.type === 1) {
             const question = await this.questionCollection.findOne({ _id: data.id_question });
             if (question === null) {
@@ -64,7 +62,7 @@ class Question {
             return data.reponse === reponse;
         } else if (data.type === 2) {
             const question = await this.questionCollection.aggregate([
-                { $match: { _id: data.id_question } },
+                { $match: { _id: ObjectID(data.id_question) } },
                 { $project: { propositions: 1, _id: 0 } },
             ]).toArray()
             if (question === null) {

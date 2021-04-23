@@ -27,4 +27,11 @@ module.exports = class Part {
             $set: reponse
         })
     }
+
+    async deletePart(id_part) {
+        const part = this.partCollection.deleteOne({
+            _id: ObjectID(id_part)
+        })
+        return part;
+    }
 }

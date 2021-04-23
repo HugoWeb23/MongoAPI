@@ -62,9 +62,20 @@ const themes = (app, db) => {
         if (!matched) {
             return res.status(400).json(v.errors);
         }
-        data.themeId = new ObjectID(data.themeId);
         const reponse = await themeClass.editTheme(data.themeId, data.theme)
         return res.json(reponse);
+    })
+
+    app.delete('/api/themes/:_id', async(req, res) => {
+        const v = new Validator(data, {
+            _id: 'required|string|checkObjectid'
+        })
+
+        const matched = await v.check();
+
+        if (!matched) {
+            return res.status(400).json(v.errors);
+        }
     })
 }
 
