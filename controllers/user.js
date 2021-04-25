@@ -64,6 +64,21 @@ extend('checkObjectid', ({ value }, validator) => {
     })
 
     app.post('/login', async (req, res) => {
+        const data = req.body;
+        const v = new Validator(data, {
+            email: 'required|email',
+            pass: 'required|string',
+        })
+
+        const matched = await v.check();
+
+        if (!matched) {
+            const errors = {}
+            for(const [key, value] of Object.entries(v.errors)) {
+               errors[key] = value;
+            }
+            return res.status(400).json(errors);
+        }
         passport.authenticate('local', { session: false }, (err, user) => {
             if (err || !user) {
                 return res.status(400).json({ type: 'erreur', message: 'Adresse e-mail ou mot de passe incorrect' })
@@ -99,7 +114,7 @@ extend('checkObjectid', ({ value }, validator) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.json(v.errors);
+            return res.status(400).json(v.errors);
         }
         data.pass ? data.pass = await bcrypt.hash(data.pass, 10) : null;
         data.admin = data.admin === "true";
@@ -110,6 +125,10 @@ extend('checkObjectid', ({ value }, validator) => {
             return res.status(200).json(value);
         }
 
+    })
+
+    app.get('/api/user', (req, res) => {
+        return res.json(req.user)
     })
 }
 
