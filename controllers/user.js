@@ -11,8 +11,9 @@ addCustomMessages({
     'userId.required': "Veuillez saisir un ID utilisateur",
     'nom.required': "Veuillez saisir un nom",
     'prenom.required': "Veuillez saisir un prénom",
-    'email.required': "Veuillez saisir une adresse e-mail",
-    'email.email': "L'adresse e-mail n'est pas valide",
+    'email.required': "Veuillez saisir une adresse email",
+    'email.email': "L'adresse email n'est pas valide",
+    'email.checkEmail': "Cette adresse email est déjà utilisée",
     'pass.required': "Veuillez saisir un mot de passe",
     'admin.required': "Le grade de l'utilisateur est obligatoire",
     'admin.boolean': "Le grade de l'utilisateur n'est pas valide",
@@ -24,6 +25,8 @@ const users = (app, db) => {
         throw new Error("Invalid Database");
     }
 
+    const userClass = new User(db);
+
 // Vérifie si un ObjectID est valide
 extend('checkObjectid', ({ value }, validator) => {
     if (ObjectID.isValid(value) === false) {
@@ -32,7 +35,10 @@ extend('checkObjectid', ({ value }, validator) => {
     return true;
 })
 
-    const userClass = new User(db);
+// Vérifie si une adresse email est disponible
+extend('checkEmail', async({ value }) => {
+    return await userClass.emailIsAvailable(value); // True ou false
+})
 
     app.post("/register", async (req, res) => {
         const data = req.body;
@@ -40,22 +46,22 @@ extend('checkObjectid', ({ value }, validator) => {
         const v = new Validator(data, {
             nom: 'required|string',
             prenom: 'required|string',
-            email: 'required|email',
-            admin: 'required|boolean',
+            email: 'required|email|checkEmail',
             pass: 'required|string'
         })
 
         const matched = await v.check();
 
         if (!matched) {
-            return res.json(v.errors);
+            return res.status(400).json({errors: v.errors});
         }
 
         data.pass = await bcrypt.hash(data.pass, 10);
-        data.admin = data.admin === "true";
+        data.admin = false;
         const reponse = await userClass.createUser(data);
         const user = reponse.ops[0]
-        const token = jwt.sign({ id: reponse.ops[0]._id }, process.env.secretKey, {
+        delete user.pass;
+        const token = jwt.sign(user, process.env.secretKey, {
             expiresIn: 432000
         });
         user.token = token
@@ -69,24 +75,18 @@ extend('checkObjectid', ({ value }, validator) => {
             email: 'required|email',
             pass: 'required|string',
         })
-
         const matched = await v.check();
-
         if (!matched) {
-            const errors = {}
-            for(const [key, value] of Object.entries(v.errors)) {
-               errors[key] = value;
-            }
-            return res.status(400).json(errors);
+            return res.status(400).json({errors: v.errors});
         }
         passport.authenticate('local', { session: false }, (err, user) => {
             if (err || !user) {
-                return res.status(400).json({ type: 'erreur', message: 'Adresse e-mail ou mot de passe incorrect' })
+                return res.status(400).json({errors: {message: 'Adresse e-mail ou mot de passe incorrect'}})
             }
 
             req.login(user, { session: false }, (err) => {
                 if (err) {
-                    res.json({ type: 'erreur', message: 'Erreur lors de l\'identification' })
+                    res.status(400).json({errors: {message: 'Adresse e-mail ou mot de passe incorrect'}})
                 }
                 delete user.pass;
                 const token = jwt.sign(user, process.env.secretKey, {
@@ -128,6 +128,7 @@ extend('checkObjectid', ({ value }, validator) => {
     })
 
     app.get('/api/user', (req, res) => {
+        console.log(req.user);
         return res.json(req.user)
     })
 }

@@ -28,6 +28,13 @@ class User {
         return value;
     }
 
+    async emailIsAvailable(data) {
+        const email = await this.userCollection.findOne({
+            email: data
+        })
+        return email != null ? false : true;
+    }
+
 }
 
 module.exports = User;
