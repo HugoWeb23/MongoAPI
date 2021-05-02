@@ -128,7 +128,6 @@ extend('checkEmail', async({ value }) => {
     })
 
     app.get('/api/user', (req, res) => {
-        console.log(req.user);
         return res.json(req.user)
     })
 }

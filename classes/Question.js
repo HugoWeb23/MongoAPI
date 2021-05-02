@@ -13,6 +13,58 @@ class Question {
         return result;
     }
 
+    async updateQuestion(data) {
+        const {_id, type, intitule, themeId, question, reponse = null, propositions} = data;
+        const updateValues = {type,
+            intitule,
+            themeId,
+            question}
+            reponse != null ? updateValues.reponse = reponse : null;
+
+        const unsetValues = {}
+        type === 1 ? unsetValues.propositions = "" : null;
+        type === 2 ? unsetValues.reponse = "" : null;
+
+       await this.questionCollection.findOneAndUpdate({
+            _id: ObjectID(_id)
+        },
+            {
+                $set: updateValues,
+
+                $unset: unsetValues
+            },
+            {
+                returnOriginal: false
+            })
+
+            if(type === 2) {
+            const {value} = await this.questionCollection.findOneAndUpdate({
+                _id: ObjectID(_id)
+            },
+                {
+                    $set: {propositions},
+                },
+                {
+                    returnOriginal: false
+                })
+            }
+            const result = await this.questionCollection.aggregate([
+                { $match: { _id: ObjectID(_id) } },
+                {
+                    $lookup:
+                    {
+                        from: "themes",
+                        localField: "themeId",
+                        foreignField: "_id",
+                        as: "theme"
+                    }
+                },
+                { $unwind: '$theme' },
+                { $project: { themeId: 0 } }
+            ]).toArray();
+            return result;
+    }
+
     async getAllQuestions() {
         const result = await this.questionCollection.aggregate([
             {
@@ -27,7 +79,6 @@ class Question {
             { $unwind: '$theme' },
             { $project: { themeId: 0 } }
         ]).toArray();
-
         return result;
     }
 
@@ -109,6 +160,13 @@ class Question {
      
         const questions = await this.questionCollection.aggregate(rules).toArray();
         return questions;
+    }
+
+    async deleteQuestion(id) {
+        const question = this.questionCollection.deleteOne({
+            _id: ObjectID(id)
+        })
+        return question;
     }
 }
 

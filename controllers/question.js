@@ -44,31 +44,77 @@ const questions = (app, db) => {
             themeId: 'required|string|checkObjectid', // checkObjectid: vérifie si un ObjectID est valide
             question: 'required|string',
             reponse: 'requiredIf:type,1|string', // Obligatoire si le type de la question vaut 1
+            propositions: 'requiredIf:type,2|array', // Obligatoire si le type de la question vaut 2
+            'propositions.*.proposition': 'requiredIf:type,2|string'
+        })
+
+        const matched = await v.check();
+
+        if (!matched) {
+            return res.status(400).json({errors: v.errors});
+        }
+
+        data.type = parseInt(data.type, 10);
+        data.themeId = new ObjectID(data.themeId);
+
+        if(data.type === 1) {
+            delete data.propositions;
+        } else if(data.type === 2) {
+            delete data.reponse;
+        }
+        
+        if(data.propositions) {
+            data.propositions = data.propositions.map(i => {
+               let prop = {...i, _id: new ObjectID()} // Ajout d'un ID dans les propositions
+                return prop;
+            })
+        }
+
+        const reponse = await questionClass.createQuestion(data);
+        if (reponse.result.n !== 1 && reponse.result.ok !== 1) {
+            return res.json({ type: "erreur", message: "Erreur lors de la création de la question" })
+        }
+        return res.json(reponse.ops[0]);
+    })
+
+    // Mettre à jour une question
+
+    app.put('/api/questions/:_id', async(req, res) => {
+        const data = req.body;
+        data._id = req.params._id;
+        const v = new Validator(data, {
+            _id: 'required|string|checkObjectid',
+            type: 'required|integer',
+            intitule: 'required|string',
+            themeId: 'required|string|checkObjectid', // checkObjectid: vérifie si un ObjectID est valide
+            question: 'required|string',
+            reponse: 'requiredIf:type,1|string', // Obligatoire si le type de la question vaut 1
             propositions: 'requiredIf:type,2|array' // Obligatoire si le type de la question vaut 2
         })
 
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json(v.errors);
+            return res.status(400).json({errors: v.errors});
         }
 
         data.type = parseInt(data.type, 10);
         data.themeId = new ObjectID(data.themeId);
+
+        if(data.type === 1) {
+            delete data.propositions;
+        } else if(data.type === 2) {
+            delete data.reponse;
+        }
+
         if(data.propositions) {
             data.propositions = data.propositions.map(i => {
-                let temp = Object.assign({}, i);
-                temp.correcte = temp.correcte === "true";
-                temp._id = new ObjectID()
-                return temp;
+               let prop = {...i, _id: new ObjectID()} // Ajout d'un ID dans les propositions
+                return prop;
             })
         }
-    
-        const reponse = await questionClass.createQuestion(data);
-        if (reponse.result.n !== 1 && reponse.result.ok !== 1) {
-            return res.json({ type: "erreur", message: "Erreur lors de la création de la question" })
-        }
-        return res.json(reponse.ops[0]);
+        let reponse = await questionClass.updateQuestion(data);
+        return res.json(...reponse);
     })
 
     // Récupérer toutes les questions
@@ -128,6 +174,24 @@ const questions = (app, db) => {
             return res.json({ erreur: e });
         }
 
+    })
+
+    app.delete('/api/question/:id', async(req, res) => {
+        const data = req.params;
+        const v = new Validator(data, {
+            id: 'required|string|checkObjectid'
+        })
+
+        const matched = await v.check();
+
+        if (!matched) {
+            return res.status(400).json(v.errors);
+        }
+        const question = await questionClass.deleteQuestion(data.id);
+        if(question.result.n != 1) {
+            return res.status(400).json({type: 'error', message: "La question n'existe pas"})
+        }
+        return res.status(200).json({type: 'success', message: "La question a été supprimée"})
     })
 }
 

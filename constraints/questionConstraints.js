@@ -48,10 +48,10 @@ const questionConstraints = async (db) => {
                                 }
                             }
                         }
-                    }
                 },
             },
         },
+    }
     });
     // Insertion des questions par défaut
     db.collection(collectionName).insertMany(defaultQuestions);

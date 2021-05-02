@@ -151,7 +151,7 @@ const defaultQuestions = [{
     reponse: "river"
 },
 {
-    type: 1,
+    type: 2,
     intitule: "Traduis ce mot en anglais",
     themeId: new ObjectID("607ef9484ac4034cdf8c3361"),
     question: "terre",
