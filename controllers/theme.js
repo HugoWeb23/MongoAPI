@@ -68,6 +68,7 @@ const themes = (app, db) => {
     })
 
     app.delete('/api/themes/:_id', async(req, res) => {
+        const data = req.params;
         const v = new Validator(data, {
             _id: 'required|string|checkObjectid'
         })
@@ -77,6 +78,12 @@ const themes = (app, db) => {
         if (!matched) {
             return res.status(422).json(v.errors);
         }
+
+        const reponse = await themeClass.deleteTheme(data._id);
+        if(reponse.result.n != 1) {
+            return res.status(422).json({type: 'error', message: "Le thème n'existe pas"})
+        }
+        return res.status(200).json({type: 'success', message: "Le thème a été supprimé"})
     })
 }
 
