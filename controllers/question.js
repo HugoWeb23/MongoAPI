@@ -4,19 +4,20 @@ const { addCustomMessages, extend, Validator } = require('node-input-validator')
 
 // Erreurs de validation
 addCustomMessages({
-    'type.required': "Veuillez définir le type de la question",
+    'type.required': "Le type est obligatoire",
     'type.integer': "Le type de question n'est pas valide",
-    'intitule.required': "Veuillez saisir un intitulé",
-    'themeId.required': "Veuillez saisir un thème",
+    'intitule.required': "L'intitulé est obligatoire",
+    'themeId.required': "Le thème est obligatoire",
     'checkObjectid': "Le format de l'ObjectID n'est pas valide",
     'checkResponseType': "La réponse doit être un ObjectID valide",
-    'question.required': "Veuillez saisir une question",
+    'question.required': "La question est obligatoire",
     'propositions.requiredIf': "Veuillez saisir au moins une proposition",
     'propositions.array': "Le format des propositions n'est pas valide",
     'reponse.requiredIf': "Veuillez saisir une réponse",
     'types.array': "Le ou les types de questions à chercher doivent être passés dans un tableau",
     'types.*.integer': "Les types de questions ne sont pas valides",
-    'themes.array': "Le ou les types de thèmes à chercher doivent être passés dans un tableau"
+    'themes.array': "Le ou les types de thèmes à chercher doivent être passés dans un tableau",
+    'propositions.*.proposition': "La proposition est obligatoire"
 })
 
 // Vérifie si un ObjectID est valide
@@ -51,7 +52,7 @@ const questions = (app, db) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json({errors: v.errors});
+            return res.status(422).json({errors: v.errors});
         }
 
         data.type = parseInt(data.type, 10);
@@ -89,13 +90,14 @@ const questions = (app, db) => {
             themeId: 'required|string|checkObjectid', // checkObjectid: vérifie si un ObjectID est valide
             question: 'required|string',
             reponse: 'requiredIf:type,1|string', // Obligatoire si le type de la question vaut 1
-            propositions: 'requiredIf:type,2|array' // Obligatoire si le type de la question vaut 2
+            propositions: 'requiredIf:type,2|array', // Obligatoire si le type de la question vaut 2
+            'propositions.*.proposition': 'requiredIf:type,2|string'
         })
 
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json({errors: v.errors});
+            return res.status(422).json({errors: v.errors});
         }
 
         data.type = parseInt(data.type, 10);
@@ -134,7 +136,7 @@ const questions = (app, db) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json(v.errors);
+            return res.status(422).json(v.errors);
         }
         const { themeID } = req.params;
         const questions = await questionClass.getAllQuestionsByTheme(themeID);
@@ -163,7 +165,7 @@ const questions = (app, db) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json(v.errors);
+            return res.status(422).json(v.errors);
         }
         data.type = parseInt(data.type, 10);
         data.reponse = data.reponse.toLowerCase();
@@ -185,11 +187,11 @@ const questions = (app, db) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json(v.errors);
+            return res.status(422).json(v.errors);
         }
         const question = await questionClass.deleteQuestion(data.id);
         if(question.result.n != 1) {
-            return res.status(400).json({type: 'error', message: "La question n'existe pas"})
+            return res.status(422).json({type: 'error', message: "La question n'existe pas"})
         }
         return res.status(200).json({type: 'success', message: "La question a été supprimée"})
     })

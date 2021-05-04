@@ -32,7 +32,7 @@ const themes = (app, db) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json(v.errors);
+            return res.status(422).json({errors: v.errors});
         }
         const reponse = await themeClass.createTheme(data);
         if (reponse.result.n !== 1 && reponse.result.ok !== 1) {
@@ -50,19 +50,20 @@ const themes = (app, db) => {
 
     // Modifier un thème
 
-    app.put('/api/themes', async (req, res) => {
+    app.put('/api/themes/:_id', async (req, res) => {
         const data = req.body;
+        data._id = req.params._id;
         const v = new Validator(data, {
-            themeId: 'required|string|checkObjectid',
+            _id: 'required|string|checkObjectid',
             theme: 'required|string'
         })
 
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json(v.errors);
+            return res.status(422).json({errors: v.errors});
         }
-        const reponse = await themeClass.editTheme(data.themeId, data.theme)
+        const reponse = await themeClass.editTheme(data._id, data.theme)
         return res.json(reponse);
     })
 
@@ -74,7 +75,7 @@ const themes = (app, db) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json(v.errors);
+            return res.status(422).json(v.errors);
         }
     })
 }
