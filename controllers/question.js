@@ -72,10 +72,8 @@ const questions = (app, db) => {
         }
 
         const reponse = await questionClass.createQuestion(data);
-        if (reponse.result.n !== 1 && reponse.result.ok !== 1) {
-            return res.json({ type: "erreur", message: "Erreur lors de la création de la question" })
-        }
-        return res.json(reponse.ops[0]);
+       
+        return res.json(...reponse);
     })
 
     // Mettre à jour une question

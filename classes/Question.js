@@ -9,7 +9,21 @@ class Question {
     }
 
     async createQuestion(data) {
-        const result = await this.questionCollection.insertOne(data);
+        const question = await this.questionCollection.insertOne(data);
+        const result = await this.questionCollection.aggregate([
+            {$match: {_id: ObjectID(question.ops[0]._id)}},
+            {
+                $lookup:
+                {
+                    from: "themes",
+                    localField: "themeId",
+                    foreignField: "_id",
+                    as: "theme"
+                }
+            },
+            { $unwind: '$theme' },
+            { $project: { themeId: 0 } }
+        ]).toArray();
         return result;
     }
 
