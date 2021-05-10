@@ -2,7 +2,6 @@ const express = require('express');
 const getDb = require('./database/connexion');
 
 // Controllers
-const test = require('./controllers/test');
 const questions = require('./controllers/question');
 const themes = require('./controllers/theme');
 const users = require('./controllers/user');
@@ -23,8 +22,6 @@ app.use(cors());
 
     myPassportLocal(db);
     myPassportJWT(db);
-
-    test(app, db);
     questions(app, db);
     themes(app, db);
     users(app, db);

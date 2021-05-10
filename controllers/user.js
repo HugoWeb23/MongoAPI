@@ -53,7 +53,7 @@ extend('checkEmail', async({ value }) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json({errors: v.errors});
+            return res.status(422).json({errors: v.errors});
         }
 
         data.pass = await bcrypt.hash(data.pass, 10);
@@ -77,23 +77,23 @@ extend('checkEmail', async({ value }) => {
         })
         const matched = await v.check();
         if (!matched) {
-            return res.status(400).json({errors: v.errors});
+            return res.status(422).json({errors: v.errors});
         }
         passport.authenticate('local', { session: false }, (err, user) => {
             if (err || !user) {
-                return res.status(400).json({errors: {message: 'Adresse e-mail ou mot de passe incorrect'}})
+                return res.status(422).json({errors: {message: 'Adresse e-mail ou mot de passe incorrect'}})
             }
 
             req.login(user, { session: false }, (err) => {
                 if (err) {
-                    res.status(400).json({errors: {message: 'Adresse e-mail ou mot de passe incorrect'}})
+                    res.status(422).json({errors: {message: 'Adresse e-mail ou mot de passe incorrect'}})
                 }
                 delete user.pass;
                 const token = jwt.sign(user, process.env.secretKey, {
                     expiresIn: 432000
                 });
                 user.token = token
-                return res.json(user)
+                return res.status(200).json(user)
             })
         })(req, res)
     })
@@ -114,13 +114,13 @@ extend('checkEmail', async({ value }) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(400).json(v.errors);
+            return res.status(422).json(v.errors);
         }
         data.pass ? data.pass = await bcrypt.hash(data.pass, 10) : null;
         data.admin = data.admin === "true";
         const {lastErrorObject, value} = await userClass.updateUser(data);
         if(lastErrorObject.n != 1) {
-            return res.status(400).json({type: "error", message: "Aucun utilisateur n'a été trouvé"})
+            return res.status(422).json({type: "error", message: "Aucun utilisateur n'a été trouvé"})
         } else {
             return res.status(200).json(value);
         }
@@ -128,7 +128,7 @@ extend('checkEmail', async({ value }) => {
     })
 
     app.get('/api/user', (req, res) => {
-        return res.json(req.user)
+        return res.status(200).json(req.user)
     })
 }
 

@@ -1,6 +1,5 @@
 const dotenv = require('dotenv');
 const MongoClient = require("mongodb").MongoClient;
-const testConstraints = require('../constraints/testConstraints');
 const questionConstraints = require('../constraints/questionConstraints');
 const themeConstraints = require('../constraints/themeConstraints');
 const userConstraints = require('../constraints/userConstraints');
@@ -20,7 +19,6 @@ const getDb = async () => {
       useUnifiedTopology: true
     });
     db = client.db(dbName);
-    await testConstraints(db);
     await themeConstraints(db);
     await questionConstraints(db);
     await userConstraints(db);

@@ -38,14 +38,14 @@ const themes = (app, db) => {
         if (reponse.result.n !== 1 && reponse.result.ok !== 1) {
             return res.json({ type: "erreur", message: "Erreur lors de la création du thème" })
         }
-        return res.json(reponse.ops[0]);
+        return res.status(200).json(reponse.ops[0]);
     })
 
     // Sélectionner tous les thèmes
 
     app.get("/api/themes/all", async (req, res) => {
         const reponse = await themeClass.getAllThemes();
-        return res.json(reponse);
+        return res.status(200).json(reponse);
     })
 
     // Modifier un thème
@@ -64,7 +64,7 @@ const themes = (app, db) => {
             return res.status(422).json({errors: v.errors});
         }
         const reponse = await themeClass.editTheme(data._id, data.theme)
-        return res.json(reponse);
+        return res.status(200).json(reponse);
     })
 
     app.delete('/api/themes/:_id', async(req, res) => {

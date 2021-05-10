@@ -33,7 +33,7 @@ const partClass = new Part(db);
      const matched = await v.check();
  
      if (!matched) {
-         return res.status(400).json(v.errors);
+         return res.status(422).json(v.errors);
      }
      data.types ? data.types = data.types.map(i => parseInt(i, 10)) : null;
      data.themes ? data.themes = data.themes.map(t => new ObjectID(t)) : null;
@@ -50,7 +50,7 @@ const partClass = new Part(db);
             questionsArray.push(question)
         })
          const part = await partClass.createPart(questionsArray);
-         return res.json(questions);
+         return res.status(200).json(questions);
      })
 
      app.delete('/api/part/:_id', async(req, res) => {
@@ -61,11 +61,11 @@ const partClass = new Part(db);
       const matched = await v.check();
   
       if (!matched) {
-          return res.status(400).json(v.errors);
+          return res.status(422).json(v.errors);
       }
       const part = await partClass.deletePart(data._id);
       if(part.result.n != 1) {
-          return res.status(400).json({type: 'error', message: "La partie n'existe pas"})
+          return res.status(422).json({type: 'error', message: "La partie n'existe pas"})
       }
       return res.status(200).json({type: 'success', message: "La partie a été supprimée"})
      })

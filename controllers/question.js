@@ -73,7 +73,7 @@ const questions = (app, db) => {
 
         const reponse = await questionClass.createQuestion(data);
        
-        return res.json(...reponse);
+        return res.status(200).json(...reponse);
     })
 
     // Mettre à jour une question
