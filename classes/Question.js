@@ -168,7 +168,7 @@ class Question {
             // Si l'objet search n'est pas vide, on ajoute la propriété match dans l'aggregate en lui passant l'objet search
             Object.keys(search).length > 0 ? rules.unshift({$match: search}) : null;
 
-            data.limit ? rules.splice(1, 0, {$limit: data.limit}) : null;
+            data.limit ? rules.splice(2, 0, {$limit: data.limit}) : null;
             // Si random vaut true, on sélectionne les documents de façon aléatoire, avec une limite définie par data.limit, ou 9999 si aucune limite n'est fournie
             data.random == 'true' ? rules.splice(2, 0, {$sample: {size: data.limit || 9999}}) : null;
      
