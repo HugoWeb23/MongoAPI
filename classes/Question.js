@@ -114,6 +114,24 @@ class Question {
         return result;
     }
 
+    async getQuestionsByThemes(themes) {
+        const result = await this.questionCollection.aggregate([
+            { $match: { themeId: {$in: themes} } },
+            {
+                $lookup:
+                {
+                    from: "themes",
+                    localField: "themeId",
+                    foreignField: "_id",
+                    as: "theme"
+                }
+            },
+            { $unwind: '$theme' },
+            { $project: { themeId: 0 } }
+        ]).toArray();
+        return result;
+    }
+
     async checkReply(data) {
         if (data.type === 1) {
             const question = await this.questionCollection.findOne({ _id: data.id_question });

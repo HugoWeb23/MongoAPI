@@ -124,6 +124,26 @@ const questions = (app, db) => {
         return res.json(reponse);
     })
 
+    // Récupérer toutes les questions en rapport avec plusieurs thèmes
+
+    app.post("/api/questions", async (req, res) => {
+        const data = req.body;
+        const v = new Validator(data, {
+            themes: 'required|array',
+            'themes.*': 'checkObjectid'
+        })
+
+        const matched = await v.check();
+
+        if (!matched) {
+            return res.status(422).json(v.errors);
+        }
+
+        data.themes = data.themes.map(t => new ObjectID(t));
+        const reponse = await questionClass.getQuestionsByThemes(data.themes);
+        return res.status(200).json(reponse);
+    })
+
     // Récupérer toutes les questions en fonction de l'ID d'un thème
 
     app.get('/api/:themeID/questions', async (req, res) => {
