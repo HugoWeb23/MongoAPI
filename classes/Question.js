@@ -134,14 +134,14 @@ class Question {
 
     async checkReply(data) {
         if (data.type === 1) {
-            const question = await this.questionCollection.findOne({ _id: data.id_question });
+            const question = await this.questionCollection.findOne({ _id: ObjectID(data.id_question) });
             if (question === null) {
                 throw "La question n'existe pas"
             }
             const reponse = question.reponse
             data.correcte = data.reponse === reponse;
             // Enregistrement de la réponse dans la partie
-            await this.partClasse.updatePart(data);
+            await this.partClasse.updatePart(data, data.type);
             return data.reponse === reponse;
         } else if (data.type === 2) {
             const question = await this.questionCollection.aggregate([
@@ -151,14 +151,13 @@ class Question {
             if (question === null) {
                 throw "La question n'existe pas"
             }
-            // Récupère la proposition correcte dans le tableau des propositions
-            const correctProposition = question[0].propositions.filter(i => i.correcte === true);
-            // Détermine si l'ObjectID passé en réponse correpond à l'ObjectID de la proposition correcte
-            data.correcte = ObjectID(data.reponse).equals(correctProposition[0]._id);
-            data.reponse = new ObjectID(data.reponse);
+            // Récupère la proposition correctes
+            const correctPropositions = question[0].propositions.filter(p => p.correcte);
+           
+            data.correcte = (data.propositions.length === correctPropositions.length && correctPropositions.every(p => data.propositions.some(prop => prop == p._id)))
              // Enregistrement de la réponse dans la partie
-            await this.partClasse.updatePart(data);
-            return ObjectID(data.reponse).equals(correctProposition[0]._id)
+            this.partClasse.updatePart(data, data.type);
+            return data.correcte;
         }
     }
 
@@ -179,16 +178,16 @@ class Question {
         ];
             let search = {}
             // Si le tableau de types à rechercher contient au moins une valeur, on l'ajoute dans l'objet search
-            data.types ? search['type'] = {$in: data.types} : null; 
+            data.types && data.types.length > 0 ? search['type'] = {$in: data.types} : null; 
             // Si le tableau de thèmes à rechercher contient au moins une valeur, on l'ajoute dans l'objet search
-            data.themes ? search['themeId'] = {$in: data.themes} : null;
-            data.questions ? search['_id'] = {$in: data.questions} : null;
+            data.themes && data.themes.length > 0 ? search['themeId'] = {$in: data.themes} : null;
+            data.questions && data.questions.length > 0 ? search['_id'] = {$in: data.questions} : null;
             // Si l'objet search n'est pas vide, on ajoute la propriété match dans l'aggregate en lui passant l'objet search
             Object.keys(search).length > 0 ? rules.unshift({$match: search}) : null;
 
             data.limit ? rules.splice(2, 0, {$limit: data.limit}) : null;
             // Si random vaut true, on sélectionne les documents de façon aléatoire, avec une limite définie par data.limit, ou 9999 si aucune limite n'est fournie
-            data.random == 'true' ? rules.splice(2, 0, {$sample: {size: data.limit || 9999}}) : null;
+            data.random == true ? rules.splice(2, 0, {$sample: {size: data.limit || 9999}}) : null;
      
         const questions = await this.questionCollection.aggregate(rules).toArray();
         return questions;

@@ -7,7 +7,7 @@ module.exports = class Part {
     }
 
     async createPart(data) {
-        const part = this.partCollection.insertOne({
+        const part = await this.partCollection.insertOne({
             userId: new ObjectID("6078708a55d5264ae8c62aac"),
             date: new Date(),
             questions: data
@@ -15,13 +15,18 @@ module.exports = class Part {
         return part;
     }
 
-    async updatePart(data) {
+    async updatePart(data, type) {
         const reponse = {}
         reponse['questions.$.correcte'] = data.correcte
-        ObjectID.isValid(data.reponse) == false ? reponse['questions.$.reponse'] = data.reponse : reponse['questions.$.propositionId'] = data.reponse;
+        //ObjectID.isValid(data.reponse) == false ? reponse['questions.$.reponse'] = data.reponse : reponse['questions.$.propositionId'] = data.reponse;
+        if(type === 1) {
+            reponse['questions.$.reponse'] = data.reponse
+        } else if(type === 2) {
+            reponse['questions.$.propositions'] = data.propositions
+        }
         this.partCollection.updateOne({
-            _id: new ObjectID(data.id_part),
-            'questions.questionId': new ObjectID(data.id_question)
+            _id: ObjectID(data.id_part),
+            'questions.questionId': ObjectID(data.id_question)
         }, 
         {
             $set: reponse
@@ -29,7 +34,7 @@ module.exports = class Part {
     }
 
     async deletePart(id_part) {
-        const part = this.partCollection.deleteOne({
+        const part = await this.partCollection.deleteOne({
             _id: ObjectID(id_part)
         })
         return part;

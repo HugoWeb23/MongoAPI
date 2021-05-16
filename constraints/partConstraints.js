@@ -23,7 +23,6 @@ const partConstraints = async (db) => {
                         bsonType: "array",
                         items: {
                             bsonType: "object",
-                            required: ["questionId"],
                             properties: {
                                 questionId: {
                                     bsonType: "objectId",
@@ -36,10 +35,6 @@ const partConstraints = async (db) => {
                                 reponse: {
                                     bsonType: "string",
                                     description: "La réponse fournie",
-                                },
-                                propositionId: {
-                                    bsonType: "objectId",
-                                    description: "La proposition sélectionnée",
                                 }
                             }
                         }

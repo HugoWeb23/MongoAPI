@@ -38,7 +38,7 @@ const partClass = new Part(db);
      data.types ? data.types = data.types.map(i => parseInt(i, 10)) : null;
      data.themes ? data.themes = data.themes.map(t => new ObjectID(t)) : null;
      data.questions ? data.questions = data.questions.map(q => new ObjectID(q)) : null;
-     data.limit ? data.limit = parseInt(data.limit, 10) : null;
+     data.limit ? data.limit = parseInt(data.limit, 10) : data.limit = parseInt(30, 10); // 30 questions par défaut
     
          const questions = await questionClass.getQuestions(data);
        
@@ -50,7 +50,8 @@ const partClass = new Part(db);
             questionsArray.push(question)
         })
          const part = await partClass.createPart(questionsArray);
-         return res.status(200).json(questions);
+         const id_part = part.ops[0]._id
+         return res.status(200).json({id_part: id_part, questions: questions});
      })
 
      app.delete('/api/part/:_id', async(req, res) => {
