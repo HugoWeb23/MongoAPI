@@ -20,9 +20,9 @@ module.exports = class Part {
         reponse['questions.$.correcte'] = data.correcte
         //ObjectID.isValid(data.reponse) == false ? reponse['questions.$.reponse'] = data.reponse : reponse['questions.$.propositionId'] = data.reponse;
         if(type === 1) {
-            reponse['questions.$.reponse'] = data.reponse
+            reponse['questions.$.reponseEcrite'] = data.reponseEcrite
         } else if(type === 2) {
-            reponse['questions.$.propositions'] = data.propositions
+            reponse['questions.$.propositionsSelect'] = data.propositionsSelect
         }
         this.partCollection.updateOne({
             _id: ObjectID(data.id_part),
@@ -49,9 +49,20 @@ module.exports = class Part {
                 from: "questions",
                 localField: "questions.questionId",
                 foreignField: "_id",
-                as: "test"
+                as: "OriginalQuestions"
             }
-        }
+        },
+        {$addFields : {questions: 
+            {$map : {
+                input : "$questions", 
+                as : "e", 
+                in : {$mergeObjects: [
+                    "$$e",
+                    {$arrayElemAt :[{$filter : {input : "$OriginalQuestions", as : "j", cond : {$eq :["$$e.questionId", "$$j._id"]}}},0]}
+                    ]
+                }}}
+        }},
+        {$project : {OriginalQuestions: 0, 'userId': 0, 'questions.questionId': 0}}
         ]).toArray();
 
         return part

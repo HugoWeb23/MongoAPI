@@ -32,7 +32,7 @@ const partConstraints = async (db) => {
                                     bsonType: "bool",
                                     description: "La réponse a-t-elle été répondue correctement ?",
                                 },
-                                reponse: {
+                                reponseEcrite: {
                                     bsonType: "string",
                                     description: "La réponse fournie",
                                 }

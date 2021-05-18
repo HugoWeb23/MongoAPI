@@ -175,8 +175,8 @@ const questions = (app, db) => {
             id_part: 'required|string|checkObjectid', // checkObjectid: vérifie si un ObjectID est valide
             id_question: 'required|string|checkObjectid', // checkObjectid: vérifie si un ObjectID est valide
             type: 'required|integer',
-            reponse: 'requiredIf:type,1',
-            propositions: 'requiredIf:type,2|checkPropsType'
+            reponseEcrite: 'requiredIf:type,1',
+            propositionsSelect: 'requiredIf:type,2|checkPropsType'
         })
 
         const matched = await v.check();
@@ -185,7 +185,7 @@ const questions = (app, db) => {
             return res.status(422).json(v.errors);
         }
         data.type = parseInt(data.type, 10);
-        data.reponse ? data.reponse = data.reponse.toLowerCase() : null;
+        data.reponseEcrite ? data.reponseEcrite = data.reponseEcrite.toLowerCase() : null;
         try {
             const reponse = await questionClass.checkReply(data);
             return res.json({ isCorrect: reponse });

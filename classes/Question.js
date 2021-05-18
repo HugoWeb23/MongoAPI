@@ -139,10 +139,10 @@ class Question {
                 throw "La question n'existe pas"
             }
             const reponse = question.reponse
-            data.correcte = data.reponse === reponse;
+            data.correcte = data.reponseEcrite === reponse;
             // Enregistrement de la réponse dans la partie
             await this.partClasse.updatePart(data, data.type);
-            return data.reponse === reponse;
+            return data.reponseEcrite === reponse;
         } else if (data.type === 2) {
             const question = await this.questionCollection.aggregate([
                 { $match: { _id: ObjectID(data.id_question) } },
@@ -154,7 +154,7 @@ class Question {
             // Récupère la proposition correctes
             const correctPropositions = question[0].propositions.filter(p => p.correcte);
            
-            data.correcte = (data.propositions.length === correctPropositions.length && correctPropositions.every(p => data.propositions.some(prop => prop == p._id)))
+            data.correcte = (data.propositionsSelect.length === correctPropositions.length && correctPropositions.every(p => data.propositionsSelect.some(prop => prop == p._id)))
              // Enregistrement de la réponse dans la partie
             this.partClasse.updatePart(data, data.type);
             return data.correcte;
