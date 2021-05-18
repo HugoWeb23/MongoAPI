@@ -39,4 +39,21 @@ module.exports = class Part {
         })
         return part;
     }
+
+    async partResults(_id) {
+        const part = await this.partCollection.aggregate([
+        {$match: {_id: ObjectID(_id)}},
+        {
+            $lookup:
+            {
+                from: "questions",
+                localField: "questions.questionId",
+                foreignField: "_id",
+                as: "test"
+            }
+        }
+        ]).toArray();
+
+        return part
+    }
 }

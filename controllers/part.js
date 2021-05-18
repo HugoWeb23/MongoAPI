@@ -11,11 +11,22 @@ const part = (app, db) => {
 const questionClass = new Question(db);
 const partClass = new Part(db);
 
-// Créer une nouvelle partie et récupérer les questions en fonction des paramètres fournis
+extend('checkObjectid', ({ value }, validator) => {
+    if (ObjectID.isValid(value) === false) {
+        return false;
+    }
+    return true;
+})
+
     /**
+     * Créer une nouvelle partie et récupérer les questions en fonction des paramètres fournis
+     * 
      * Les éléments de recherches :
      * types: un tableau de types de questions à chercher
      * themes: un tableau de thèmes de question à chercher
+     * questions: un tableau contenant les questions à afficher
+     * limit: une limite de questions à afficher
+     * random: possibilité d'afficher les résultats de façon aléatoire
      */
 
      app.post('/api/part/new', async (req, res) => {
@@ -70,6 +81,20 @@ const partClass = new Part(db);
       }
       return res.status(200).json({type: 'success', message: "La partie a été supprimée"})
      })
+
+     app.get('/api/part/:_id', async(req, res) => {
+        const data = req.params;
+        const v = new Validator(data, {
+            _id: 'checkObjectid'
+        })
+        const matched = await v.check();
+    
+        if (!matched) {
+            return res.status(422).json(v.errors);
+        }
+        const response = await partClass.partResults(data._id)
+        return res.status(200).json(response)
+    })
     }
 
     module.exports = part;
