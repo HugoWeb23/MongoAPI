@@ -60,10 +60,12 @@ extend('checkObjectid', ({ value }, validator) => {
             }
             questionsArray.push(question)
         })
-         const part = await partClass.createPart(questionsArray);
+         const part = await partClass.createPart(questionsArray, req.user._id);
          const id_part = part.ops[0]._id
          return res.status(200).json({id_part: id_part, questions: questions});
      })
+
+     // Supprimer une partie
 
      app.delete('/api/part/:_id', async(req, res) => {
          const data = req.params;
@@ -82,6 +84,15 @@ extend('checkObjectid', ({ value }, validator) => {
       return res.status(200).json({type: 'success', message: "La partie a été supprimée"})
      })
 
+     // Récupérer toutes les parties
+
+     app.get('/api/parts', async(req, res) => {
+         const parts = await partClass.getUserAllParts(req.user._id);
+         return res.status(200).json(parts);
+     })
+
+     // Récupérer les détails d'une partie
+
      app.get('/api/part/:_id', async(req, res) => {
         const data = req.params;
         const v = new Validator(data, {
@@ -92,8 +103,8 @@ extend('checkObjectid', ({ value }, validator) => {
         if (!matched) {
             return res.status(422).json(v.errors);
         }
-        const response = await partClass.partResults(data._id)
-        return res.status(200).json(response)
+        let response = await partClass.partResults(data._id)
+        return res.status(200).json(...response)
     })
     }
 

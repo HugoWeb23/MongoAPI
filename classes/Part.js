@@ -6,9 +6,9 @@ module.exports = class Part {
         this.partCollection = this.db.collection('parties');
     }
 
-    async createPart(data) {
+    async createPart(data, UserId) {
         const part = await this.partCollection.insertOne({
-            userId: new ObjectID("6078708a55d5264ae8c62aac"),
+            userId: new ObjectID(UserId),
             date: new Date(),
             questions: data
         })
@@ -18,7 +18,6 @@ module.exports = class Part {
     async updatePart(data, type) {
         const reponse = {}
         reponse['questions.$.correcte'] = data.correcte
-        //ObjectID.isValid(data.reponse) == false ? reponse['questions.$.reponse'] = data.reponse : reponse['questions.$.propositionId'] = data.reponse;
         if(type === 1) {
             reponse['questions.$.reponseEcrite'] = data.reponseEcrite
         } else if(type === 2) {
@@ -38,6 +37,32 @@ module.exports = class Part {
             _id: ObjectID(id_part)
         })
         return part;
+    }
+
+    async getUserAllParts(UserId) {
+        const allParts = await this.partCollection.aggregate([
+            {$match: {userId: ObjectID(UserId)}},
+            {$addFields: {
+                totalQuestions: { $size: "$questions" },
+                trueQuestions: { $size: {
+                    $filter: {
+                       input: "$questions",
+                       as: "question",
+                       cond: { $eq: [ "$$question.correcte", true ] }
+                    }
+                 }},
+                 falseQuestions: { $size: {
+                    $filter: {
+                       input: "$questions",
+                       as: "question",
+                       cond: { $eq: [ "$$question.correcte", false ] }
+                    }
+                 }}
+            }},
+        {$project: {totalQuestions: 1, trueQuestions: 1, falseQuestions: 1, date: 1}
+    }
+        ]).toArray();
+        return allParts;
     }
 
     async partResults(_id) {
