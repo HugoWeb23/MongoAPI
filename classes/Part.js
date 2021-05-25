@@ -57,10 +57,10 @@ module.exports = class Part {
                        as: "question",
                        cond: { $eq: [ "$$question.correcte", false ] }
                     }
-                 }}
+                 }},
+                 isFinished: { $anyElementTrue: [ "$questions.correcte" ] }
             }},
-        {$project: {totalQuestions: 1, trueQuestions: 1, falseQuestions: 1, date: 1}
-    }
+        {$project: {totalQuestions: 1, trueQuestions: 1, falseQuestions: 1, date: 1, isFinished: 1}}
         ]).toArray();
         return allParts;
     }
@@ -77,7 +77,9 @@ module.exports = class Part {
                 as: "OriginalQuestions"
             }
         },
-        {$addFields : {questions: 
+        {$addFields : {
+            totalQuestions: {$size: "$questions"},
+            questions: 
             {$map : {
                 input : "$questions", 
                 as : "e", 
@@ -90,6 +92,6 @@ module.exports = class Part {
         {$project : {OriginalQuestions: 0, 'userId': 0, 'questions.questionId': 0}}
         ]).toArray();
 
-        return part
+        return part[0]
     }
 }

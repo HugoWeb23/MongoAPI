@@ -2,6 +2,7 @@ const { Db, ObjectID } = require("mongodb");
 const Part = require('../classes/Part');
 const { addCustomMessages, extend, Validator } = require('node-input-validator');
 const Question = require("../classes/Question");
+const { response } = require("express");
 
 const part = (app, db) => {
     if (!(db instanceof Db)) {
@@ -94,9 +95,15 @@ extend('checkObjectid', ({ value }, validator) => {
      // Récupérer les détails d'une partie
 
      app.get('/api/part/:_id', async(req, res) => {
+        const {limit, page} = req.query;
         const data = req.params;
+        limit ? data.limit = limit : null;
+        page ? data.page = page : null;
         const v = new Validator(data, {
-            _id: 'checkObjectid'
+            _id: 'checkObjectid',
+            limit: 'required|integer',
+            page: 'required|integer'
+
         })
         const matched = await v.check();
     
@@ -104,7 +111,12 @@ extend('checkObjectid', ({ value }, validator) => {
             return res.status(422).json(v.errors);
         }
         let response = await partClass.partResults(data._id)
-        return res.status(200).json(...response)
+        const NumberOfPages = Math.ceil(response.totalQuestions / data.limit);
+        const IndexMax = data.page * data.limit;
+        const IndexMin = IndexMax - data.limit;
+        response.totalPages = NumberOfPages
+        response.questions = response.questions.slice(IndexMin, IndexMax);
+        return res.status(200).json(response)
     })
     }
 
