@@ -89,7 +89,7 @@ extend('checkObjectid', ({ value }, validator) => {
 
      app.get('/api/parts', async(req, res) => {
          const parts = await partClass.getUserAllParts(req.user._id);
-         return res.status(200).json(parts);
+         return res.status(200).json({totalParts: parts.countParts, allParts: parts.allParts});
      })
 
      // Récupérer les détails d'une partie
