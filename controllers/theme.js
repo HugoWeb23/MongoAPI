@@ -67,6 +67,12 @@ const themes = (app, db) => {
         return res.status(200).json(reponse);
     })
 
+    app.post('/api/themes/search', async(req, res) => {
+        const theme = req.body.theme
+        const themes = await themeClass.searchTheme(theme)
+        return res.status(200).json(themes)
+    })
+
     app.delete('/api/themes/:_id', async(req, res) => {
         const data = req.params;
         const v = new Validator(data, {

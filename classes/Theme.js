@@ -32,6 +32,13 @@ class Theme {
         return value
     }
 
+    async searchTheme(theme) {
+        const themes = await this.themeCollection.find({
+            "theme": new RegExp(theme, 'i')
+        }).toArray()
+        return themes;
+    }
+
     async deleteTheme(_id) {
         const theme = await this.themeCollection.deleteOne({
             _id: ObjectID(_id)
