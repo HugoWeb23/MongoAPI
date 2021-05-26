@@ -40,10 +40,7 @@ module.exports = class Part {
     }
 
     async getUserAllParts(UserId) {
-        const countParts = await this.partCollection.find(
-           {userId: ObjectID(UserId)}
-           ).count();
-
+    
         const allParts = await this.partCollection.aggregate([
             {$match: {userId: ObjectID(UserId)}},
             {$addFields: {
@@ -71,10 +68,9 @@ module.exports = class Part {
             {$addFields: {
                 isFinished: { $eq: ["$totalQuestions", "$questionsAnswered"] },
             }},
-        
         {$project: {totalQuestions: 1, trueQuestions: 1, falseQuestions: 1, date: 1, isFinished: 1}}
         ]).toArray();
-        return {countParts, allParts};
+        return allParts;
     }
 
     async partResults(_id) {

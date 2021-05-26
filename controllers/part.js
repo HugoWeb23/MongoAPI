@@ -88,8 +88,25 @@ extend('checkObjectid', ({ value }, validator) => {
      // Récupérer toutes les parties
 
      app.get('/api/parts', async(req, res) => {
-         const parts = await partClass.getUserAllParts(req.user._id);
-         return res.status(200).json({totalParts: parts.countParts, allParts: parts.allParts});
+         const data = req.query
+         const v = new Validator(data, {
+            limit: 'required|integer',
+            page: 'required|integer'
+
+        })
+        const matched = await v.check();
+    
+        if (!matched) {
+            return res.status(422).json(v.errors);
+        }
+         let parts = await partClass.getUserAllParts(req.user._id);
+         const NumberOfPages = Math.ceil(parts.length / data.limit);
+         const IndexMax = data.page * data.limit;
+         const IndexMin = IndexMax - data.limit;
+         const infos = {}
+         infos.totalPages = NumberOfPages
+         parts = parts.slice(IndexMin, IndexMax);
+         return res.status(200).json({...infos, allParts: parts});
      })
 
      // Récupérer les détails d'une partie
