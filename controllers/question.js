@@ -120,7 +120,24 @@ const questions = (app, db) => {
     // Récupérer toutes les questions
 
     app.get("/api/questions/all", async (req, res) => {
-        const reponse = await questionClass.getAllQuestions();
+        const isArray = (value) => {
+            return value && !Array.isArray(value)
+        }
+        let data = req.query
+        isArray(data.theme) && (data.theme = [data.theme])
+        isArray(data.type) && (data.type = [data.type])
+       
+        const v = new Validator(data, {
+            theme: 'array',
+            'theme.*': 'checkObjectid'
+        })
+
+        const matched = await v.check();
+
+        if (!matched) {
+            return res.status(422).json({errors: v.errors});
+        }
+        const reponse = await questionClass.getAllQuestions(data);
         return res.json(reponse);
     })
 
