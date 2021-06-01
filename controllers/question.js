@@ -1,6 +1,7 @@
 const { Db, ObjectID } = require("mongodb");
 const Question = require('../classes/Question');
 const { addCustomMessages, extend, Validator } = require('node-input-validator');
+const { response } = require("express");
 
 // Erreurs de validation
 addCustomMessages({
@@ -137,8 +138,19 @@ const questions = (app, db) => {
         if (!matched) {
             return res.status(422).json({errors: v.errors});
         }
-        const reponse = await questionClass.getAllQuestions(data);
-        return res.json(reponse);
+        let reponse = await questionClass.getAllQuestions(data);
+
+        const NumberOfPages = Math.ceil(reponse.length / data.limit);
+        if(data.page > NumberOfPages) {
+            data.page = NumberOfPages
+        }
+        const IndexMax = data.page * data.limit;
+        const IndexMin = IndexMax - data.limit;
+        const infos = {}
+        infos.totalPages = NumberOfPages
+        infos.currentPage = parseInt(data.page, 10)
+        reponse = reponse.slice(IndexMin, IndexMax);
+        return res.json({...infos, allQuestions: reponse});
     })
 
     // Récupérer toutes les questions en rapport avec plusieurs thèmes
