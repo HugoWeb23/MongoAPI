@@ -40,7 +40,6 @@ module.exports = class Part {
     }
 
     async getUserAllParts(UserId) {
-    
         const allParts = await this.partCollection.aggregate([
             {$match: {userId: ObjectID(UserId)}},
             {$addFields: {
@@ -98,6 +97,26 @@ module.exports = class Part {
                 }}}
         }},
         {$project : {OriginalQuestions: 0, 'userId': 0, 'questions.questionId': 0}}
+        ]).toArray();
+
+        return part[0]
+    }
+
+    // Récupérer les questions d'une partie en cours
+
+    async partQuestions(_id) {
+        const part = await this.partCollection.aggregate([
+        {$match: {_id: ObjectID(_id), "questions.correcte": true}},
+        {
+            $lookup:
+            {
+                from: "questions",
+                localField: "questions.questionId",
+                foreignField: "_id",
+                as: "AllQuestions"
+            }
+        },
+        {$project : {'AllQuestions.reponse': 0, 'AllQuestions.propositions.correcte': 0}}
         ]).toArray();
 
         return part[0]

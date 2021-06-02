@@ -135,6 +135,21 @@ extend('checkObjectid', ({ value }, validator) => {
         response.questions = response.questions.slice(IndexMin, IndexMax);
         return res.status(200).json(response)
     })
+
+    app.get('/api/part/getparty/:_id', async(req, res) => {
+        const data = req.params;
+        const v = new Validator(data, {
+            _id: 'checkObjectid'
+        })
+        const matched = await v.check();
+    
+        if (!matched) {
+            return res.status(422).json(v.errors);
+        }
+
+        const questions = await partClass.partQuestions(data._id);
+        return res.status(200).json(questions)
+    })
     }
 
     module.exports = part;
