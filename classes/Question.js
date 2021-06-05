@@ -192,7 +192,6 @@ class Question {
         data.types && data.types.length > 0 ? search['type'] = { $in: data.types } : null;
         // Si le tableau de thèmes à rechercher contient au moins une valeur, on l'ajoute dans l'objet search
         data.themes && data.themes.length > 0 ? search['themeId'] = { $in: data.themes } : null;
-        console.log(data.themes);
         data.questions && data.questions.length > 0 ? search['_id'] = { $in: data.questions } : null;
         // Si l'objet search n'est pas vide, on ajoute la propriété match dans l'aggregate en lui passant l'objet search
         Object.keys(search).length > 0 ? rules.unshift({ $match: search }) : null;

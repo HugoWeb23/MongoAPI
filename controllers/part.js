@@ -63,7 +63,7 @@ extend('checkObjectid', ({ value }, validator) => {
         })
          const part = await partClass.createPart(questionsArray, req.user._id);
          const id_part = part.ops[0]._id
-         return res.status(200).json({id_part: id_part, questions: questions});
+         return res.status(200).json({id_part: id_part, AllQuestions: questions, totalQuestions: questions.length});
      })
 
      // Supprimer une partie

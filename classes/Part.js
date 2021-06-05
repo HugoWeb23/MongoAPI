@@ -96,7 +96,7 @@ module.exports = class Part {
                     ]
                 }}}
         }},
-        {$project : {OriginalQuestions: 0, 'userId': 0, 'questions.questionId': 0}}
+        {$project : {'OriginalQuestions': 0, 'userId': 0, 'questions.questionId': 0}}
         ]).toArray();
 
         return part[0]
@@ -106,17 +106,72 @@ module.exports = class Part {
 
     async partQuestions(_id) {
         const part = await this.partCollection.aggregate([
-        {$match: {_id: ObjectID(_id), "questions.correcte": true}},
+        {$match: {_id: ObjectID(_id)}},
+        {
+            $addFields: {
+                    totalQuestions: {$size: "$questions"},
+                    filterQuestions: {
+                        $filter: {
+                           input: "$questions",
+                           as: "question",
+                           cond: {$and: [ {$ne: [ "$$question.correcte", false ]},  {$ne: [ "$$question.correcte", true ]},]}
+                        }
+                     },
+                    
+            }
+        },
         {
             $lookup:
             {
                 from: "questions",
-                localField: "questions.questionId",
+                localField: "filterQuestions.questionId",
                 foreignField: "_id",
-                as: "AllQuestions"
+                as: "FindQuestions"
             }
         },
-        {$project : {'AllQuestions.reponse': 0, 'AllQuestions.propositions.correcte': 0}}
+        {
+            $addFields: {
+                AllQuestions: 
+                {$map : {
+                    input : "$filterQuestions", 
+                    as : "e", 
+                    in : {$mergeObjects: [
+                        "$$e",
+                        {$arrayElemAt :[{$filter : {input : "$FindQuestions", as : "j", cond : {$eq :["$$e.questionId", "$$j._id"]}}},0]}
+                        ]
+                    }}},
+                    firstQuestion: {$first: "$filterQuestions"},
+                    trueQuestions: { $size: {
+                        $filter: {
+                           input: "$questions",
+                           as: "question",
+                           cond: { $eq: [ "$$question.correcte", true ] }
+                        }
+                     }},
+                   
+            },
+        },
+        {
+                $addFields: {
+                    index: { $indexOfArray: [ "$questions.questionId",  "$firstQuestion.questionId"] },
+                }
+        },
+        {
+            $addFields: {
+                currentIndex: { $add : [ 
+                    '$index', 1
+                ]},
+                id_part: '$_id'
+            }
+        },
+        {$project : {
+            'questions': 0,
+            'filterQuestions': 0,
+            'FindQuestions': 0,
+            'index': 0,
+            'firstQuestion': 0,
+            'AllQuestions.reponse': 0, 
+            'AllQuestions.propositions.correcte': 0}}
         ]).toArray();
 
         return part[0]
