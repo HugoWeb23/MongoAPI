@@ -18,7 +18,8 @@ addCustomMessages({
     'types.array': "Le ou les types de questions à chercher doivent être passés dans un tableau",
     'types.*.integer': "Les types de questions ne sont pas valides",
     'themes.array': "Le ou les types de thèmes à chercher doivent être passés dans un tableau",
-    'propositions.*.proposition': "La proposition est obligatoire"
+    'propositions.*.proposition': "La proposition est obligatoire",
+    'propositionsSelect': "Veuillez sélectionner au moins une proposition"
 })
 
 // Vérifie si un ObjectID est valide

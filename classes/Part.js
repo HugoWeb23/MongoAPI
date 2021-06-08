@@ -86,6 +86,13 @@ module.exports = class Part {
         },
         {$addFields : {
             totalQuestions: {$size: "$questions"},
+            trueQuestions: { $size: {
+                $filter: {
+                   input: "$questions",
+                   as: "question",
+                   cond: { $eq: [ "$$question.correcte", true ] }
+                }
+             }},
             questions: 
             {$map : {
                 input : "$questions", 
