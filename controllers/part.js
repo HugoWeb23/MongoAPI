@@ -101,10 +101,14 @@ extend('checkObjectid', ({ value }, validator) => {
         }
          let parts = await partClass.getUserAllParts(req.user._id);
          const NumberOfPages = Math.ceil(parts.length / data.limit);
+         if(data.page > NumberOfPages) {
+             data.page = NumberOfPages
+         }
          const IndexMax = data.page * data.limit;
          const IndexMin = IndexMax - data.limit;
          const infos = {}
          infos.totalPages = NumberOfPages
+         infos.currentPage = parseInt(data.page, 10)
          parts = parts.slice(IndexMin, IndexMax);
          return res.status(200).json({...infos, allParts: parts});
      })
@@ -129,9 +133,13 @@ extend('checkObjectid', ({ value }, validator) => {
         }
         let response = await partClass.partResults(data._id)
         const NumberOfPages = Math.ceil(response.totalQuestions / data.limit);
+        if(data.page > NumberOfPages) {
+            data.page = NumberOfPages
+        }
         const IndexMax = data.page * data.limit;
         const IndexMin = IndexMax - data.limit;
         response.totalPages = NumberOfPages
+        response.currentPage = parseInt(data.page, 10)
         response.questions = response.questions.slice(IndexMin, IndexMax);
         return res.status(200).json(response)
     })
