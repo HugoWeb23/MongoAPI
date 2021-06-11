@@ -3,6 +3,7 @@ const Part = require('../classes/Part');
 const { addCustomMessages, extend, Validator } = require('node-input-validator');
 const Question = require("../classes/Question");
 const { response } = require("express");
+const TimeCalculator = require('../services/TimeCalculator')
 
 const part = (app, db) => {
     if (!(db instanceof Db)) {
@@ -109,6 +110,12 @@ extend('checkObjectid', ({ value }, validator) => {
          const infos = {}
          infos.totalPages = NumberOfPages
          infos.currentPage = parseInt(data.page, 10)
+        parts.map(part => {
+            if(part.endingTime != undefined) {
+                return part.temps = TimeCalculator(part.startingTime, part.endingTime)
+            }
+            return part;
+        })
          parts = parts.slice(IndexMin, IndexMax);
          return res.status(200).json({...infos, allParts: parts});
      })

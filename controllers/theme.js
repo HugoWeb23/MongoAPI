@@ -41,9 +41,38 @@ const themes = (app, db) => {
         return res.status(200).json(reponse.ops[0]);
     })
 
-    // Sélectionner tous les thèmes
+    // Sélectionner tous les thèmes avec pagination
 
     app.get("/api/themes/all", async (req, res) => {
+        const data = req.query
+        const v = new Validator(data, {
+           limit: 'required|integer',
+           page: 'required|integer'
+
+       })
+       const matched = await v.check();
+   
+       if (!matched) {
+           return res.status(422).json(v.errors);
+       }
+
+        let reponse = await themeClass.getAllThemes();
+        const NumberOfPages = Math.ceil(reponse.length / data.limit);
+        if(data.page > NumberOfPages) {
+            data.page = NumberOfPages
+        }
+        const IndexMax = data.page * data.limit;
+        const IndexMin = IndexMax - data.limit;
+        const infos = {}
+        infos.totalPages = NumberOfPages
+        infos.currentPage = parseInt(data.page, 10)
+        reponse = reponse.slice(IndexMin, IndexMax);
+        return res.json({...infos, allThemes: reponse});
+    })
+
+    // Sélectionner tous les thèmes sans pagination
+
+    app.get("/api/themes", async (req, res) => {
         const reponse = await themeClass.getAllThemes();
         return res.status(200).json(reponse);
     })

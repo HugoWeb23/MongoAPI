@@ -15,10 +15,6 @@ const partConstraints = async (db) => {
                         bsonType: "objectId",
                         description: "ID de l'utilisateur",
                     },
-                    date: {
-                        bsonType: "date",
-                        description: "Date de la partie",
-                    },
                     questions: {
                         bsonType: "array",
                         items: {

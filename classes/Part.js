@@ -1,4 +1,5 @@
 const { ObjectId, ObjectID } = require('mongodb');
+let dateFormat = require('dateformat');
 
 module.exports = class Part {
     constructor(db) {
@@ -9,7 +10,8 @@ module.exports = class Part {
     async createPart(data, UserId) {
         const part = await this.partCollection.insertOne({
             userId: new ObjectID(UserId),
-            date: new Date(),
+            date: dateFormat(new Date(), "dd/mm/yyyy HH:MM:ss"),
+            startingTime: new Date().getTime(),
             questions: data
         })
         return part;
@@ -30,6 +32,19 @@ module.exports = class Part {
         {
             $set: reponse
         })
+        const lastQuestion = await this.partCollection.aggregate([
+            {$match: {_id: ObjectID(data.id_part)}},
+            { $project: { questions: { $slice: [ "$questions", -1 ] } } }
+        ]).toArray()
+        const {questionId} = lastQuestion[0]?.questions[0]
+        if(questionId == data.id_question) {
+            this.partCollection.updateOne({
+                _id: ObjectID(data.id_part)
+            }, 
+            {
+                $set: {endingTime: new Date().getTime()}
+            })
+        }
     }
 
     async deletePart(id_part) {
@@ -67,7 +82,7 @@ module.exports = class Part {
             {$addFields: {
                 isFinished: { $eq: ["$totalQuestions", "$questionsAnswered"] },
             }},
-        {$project: {totalQuestions: 1, trueQuestions: 1, falseQuestions: 1, date: 1, isFinished: 1}}
+        {$project: {totalQuestions: 1, startingTime: 1, endingTime: 1, trueQuestions: 1, falseQuestions: 1, date: 1, isFinished: 1}}
         ]).toArray();
         return allParts;
     }
