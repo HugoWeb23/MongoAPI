@@ -66,6 +66,7 @@ const themes = (app, db) => {
         const infos = {}
         infos.totalPages = NumberOfPages
         infos.currentPage = parseInt(data.page, 10)
+        infos.elementsPerPage = parseInt(data.limit, 10)
         reponse = reponse.slice(IndexMin, IndexMax);
         return res.json({...infos, allThemes: reponse});
     })
@@ -93,6 +94,9 @@ const themes = (app, db) => {
             return res.status(422).json({errors: v.errors});
         }
         const reponse = await themeClass.editTheme(data._id, data.theme)
+        if(reponse == null) {
+            return res.status(422).json({errors: {message: 'Une erreur est survenue'}})
+        }
         return res.status(200).json(reponse);
     })
 

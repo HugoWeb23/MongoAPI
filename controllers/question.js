@@ -151,6 +151,7 @@ const questions = (app, db) => {
         const infos = {}
         infos.totalPages = NumberOfPages
         infos.currentPage = parseInt(data.page, 10)
+        infos.elementsPerPage = parseInt(data.limit, 10);
         reponse = reponse.slice(IndexMin, IndexMax);
         return res.json({...infos, allQuestions: reponse});
     })
