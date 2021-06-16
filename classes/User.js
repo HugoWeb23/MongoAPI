@@ -35,6 +35,13 @@ class User {
         return email != null ? false : true;
     }
 
+    async getAllUers() {
+        const users = await this.userCollection.aggregate([
+            {$project: {pass: 0}}
+        ]).toArray()
+        return users;
+    }
+
 }
 
 module.exports = User;

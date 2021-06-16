@@ -130,6 +130,11 @@ extend('checkEmail', async({ value }) => {
     app.get('/api/user', (req, res) => {
         return res.status(200).json(req.user)
     })
+
+    app.get('/api/users', async(req, res) => {
+        const users = await userClass.getAllUers();
+        return res.status(200).json(users);
+    })
 }
 
 module.exports = users;
