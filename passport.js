@@ -27,13 +27,17 @@ const myPassportLocal = (db) => {
 }
 
 const myPassportJWT = (db) => {
+    const userCollection = db.collection('utilisateurs');
     passport.use(
         new JWTStrategy({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: process.env.secretKey
         }, async (jwtPayLoad, cb) => {
             if (jwtPayLoad) {
-                return cb(null, jwtPayLoad);
+                const {_id} = jwtPayLoad
+                const user = await userCollection.findOne({ _id: ObjectID(_id) })
+                delete user.pass
+                return cb(null, user);
             } else {
                 return cb(null, false);
             }
