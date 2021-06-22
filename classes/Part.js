@@ -74,6 +74,7 @@ module.exports = class Part {
                     }
                  }},
             }},
+            {$match: {totalQuestions: {$gt: 0}}},
             {$addFields: {
                 questionsAnswered: { $add : [ 
                     '$falseQuestions', '$trueQuestions' 

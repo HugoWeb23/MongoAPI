@@ -5,6 +5,7 @@ class Question {
     constructor(db) {
         this.db = db;
         this.questionCollection = this.db.collection('questions');
+        this.partCollection = this.db.collection('parties');
         this.partClasse = new Part(this.db);
     }
 
@@ -206,9 +207,13 @@ class Question {
     }
 
     async deleteQuestion(id) {
-        const question = this.questionCollection.deleteOne({
+        const question = await this.questionCollection.deleteOne({
             _id: ObjectID(id)
         })
+        await this.partCollection.updateMany(
+            {},
+            {$pull: {questions: {questionId: ObjectID(id)}}}
+            )
         return question;
     }
 }
