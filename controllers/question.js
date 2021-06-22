@@ -2,7 +2,8 @@ const { Db, ObjectID } = require("mongodb");
 const Question = require('../classes/Question');
 const { addCustomMessages, extend, Validator } = require('node-input-validator');
 const { response } = require("express");
-var dateFormat = require("dateformat");
+const Paginate = require('../services/Paginate')
+const Validation = require('../services/Validation')
 
 // Erreurs de validation
 addCustomMessages({
@@ -55,33 +56,33 @@ const questions = (app, db) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(422).json({errors: v.errors});
+            return res.status(422).json({ errors: v.errors });
         }
 
         data.type = parseInt(data.type, 10);
         data.themeId = new ObjectID(data.themeId);
 
-        if(data.type === 1) {
+        if (data.type === 1) {
             delete data.propositions;
-        } else if(data.type === 2) {
+        } else if (data.type === 2) {
             delete data.reponse;
         }
-        
-        if(data.propositions) {
+
+        if (data.propositions) {
             data.propositions = data.propositions.map(i => {
-               let prop = {...i, _id: new ObjectID()} // Ajout d'un ID dans les propositions
+                let prop = { ...i, _id: new ObjectID() } // Ajout d'un ID dans les propositions
                 return prop;
             })
         }
 
         const reponse = await questionClass.createQuestion(data);
-       
+
         return res.status(200).json(...reponse);
     })
 
     // Mettre à jour une question
 
-    app.put('/api/questions/:_id', async(req, res) => {
+    app.put('/api/questions/:_id', async (req, res) => {
         const data = req.body;
         data._id = req.params._id;
         const v = new Validator(data, {
@@ -98,21 +99,21 @@ const questions = (app, db) => {
         const matched = await v.check();
 
         if (!matched) {
-            return res.status(422).json({errors: v.errors});
+            return res.status(422).json({ errors: v.errors });
         }
 
         data.type = parseInt(data.type, 10);
         data.themeId = new ObjectID(data.themeId);
 
-        if(data.type === 1) {
+        if (data.type === 1) {
             delete data.propositions;
-        } else if(data.type === 2) {
+        } else if (data.type === 2) {
             delete data.reponse;
         }
 
-        if(data.propositions) {
+        if (data.propositions) {
             data.propositions = data.propositions.map(i => {
-               let prop = {...i, _id: new ObjectID()} // Ajout d'un ID dans les propositions
+                let prop = { ...i, _id: new ObjectID() } // Ajout d'un ID dans les propositions
                 return prop;
             })
         }
@@ -129,31 +130,22 @@ const questions = (app, db) => {
         let data = req.query
         isArray(data.theme) && (data.theme = [data.theme])
         isArray(data.type) && (data.type = [data.type])
-       
-        const v = new Validator(data, {
+
+        const rules = {
             theme: 'array',
-            'theme.*': 'checkObjectid'
-        })
-
-        const matched = await v.check();
-
-        if (!matched) {
-            return res.status(422).json({errors: v.errors});
+            'theme.*': 'checkObjectid',
+            limit: 'required|integer',
+            page: 'required|integer'
         }
-        let reponse = await questionClass.getAllQuestions(data);
-
-        const NumberOfPages = Math.ceil(reponse.length / data.limit);
-        if(data.page > NumberOfPages) {
-            data.page = NumberOfPages
+        try {
+            await Validation(data, rules)
+            let reponse = await questionClass.getAllQuestions(data);
+            const { infos, elements } = Paginate(reponse, data.limit, data.page)
+            return res.json({ ...infos, allQuestions: elements });
+        } catch (e) {
+            return res.status(422).json({ errors: e });
         }
-        const IndexMax = data.page * data.limit;
-        const IndexMin = IndexMax - data.limit;
-        const infos = {}
-        infos.totalPages = NumberOfPages
-        infos.currentPage = parseInt(data.page, 10)
-        infos.elementsPerPage = parseInt(data.limit, 10);
-        reponse = reponse.slice(IndexMin, IndexMax);
-        return res.json({...infos, allQuestions: reponse});
+
     })
 
     // Récupérer toutes les questions en rapport avec plusieurs thèmes
@@ -197,7 +189,7 @@ const questions = (app, db) => {
 
     // Vérifie que la réponse est un ObjectID si le type est égal à 2
     extend('checkPropsType', ({ value, args }, validator) => {
-      
+
         return true;
     })
 
@@ -227,7 +219,7 @@ const questions = (app, db) => {
 
     })
 
-    app.delete('/api/question/:id', async(req, res) => {
+    app.delete('/api/question/:id', async (req, res) => {
         const data = req.params;
         const v = new Validator(data, {
             id: 'required|string|checkObjectid'
@@ -239,10 +231,10 @@ const questions = (app, db) => {
             return res.status(422).json(v.errors);
         }
         const question = await questionClass.deleteQuestion(data.id);
-        if(question.result.n != 1) {
-            return res.status(422).json({type: 'error', message: "La question n'existe pas"})
+        if (question.result.n != 1) {
+            return res.status(422).json({ type: 'error', message: "La question n'existe pas" })
         }
-        return res.status(200).json({type: 'success', message: "La question a été supprimée"})
+        return res.status(200).json({ type: 'success', message: "La question a été supprimée" })
     })
 }
 

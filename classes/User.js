@@ -35,11 +35,43 @@ class User {
         return email != null ? false : true;
     }
 
+    async getUser(_id) {
+        const user = await this.userCollection.findOne({
+            _id: ObjectID(_id)
+        })
+        return user;
+    }
+
     async getAllUers() {
         const users = await this.userCollection.aggregate([
             {$project: {pass: 0}}
         ]).toArray()
         return users;
+    }
+
+    async deleteUser(_id) {
+        const user = await this.userCollection.deleteOne({
+            _id: ObjectID(_id)
+        })
+        return user
+    }
+
+    async updateUser(user) {
+        const { value } = await this.userCollection.findOneAndUpdate({
+            _id: ObjectID(user._id)
+        },
+            {
+                $set: {
+                    'nom': user.nom,
+                    'prenom': user.prenom,
+                    'email': user.email,
+                    'admin': user.admin
+                }
+            },
+            {
+                returnOriginal: false
+            })
+        return value
     }
 
 }

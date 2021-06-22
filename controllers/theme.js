@@ -1,6 +1,8 @@
 const { Db, ObjectID } = require("mongodb");
 const Theme = require('../classes/Theme');
 const { addCustomMessages, extend, Validator } = require('node-input-validator');
+const Paginate = require('../services/Paginate')
+const Validation = require('../services/Validation')
 
 addCustomMessages({
     'theme.required': "Veuillez saisir un thème",
@@ -25,50 +27,37 @@ const themes = (app, db) => {
 
     app.post("/api/themes/new", async (req, res) => {
         const data = req.body;
-        const v = new Validator(data, {
+        const rules = {
             theme: 'required|string'
-        })
-
-        const matched = await v.check();
-
-        if (!matched) {
-            return res.status(422).json({errors: v.errors});
         }
-        const reponse = await themeClass.createTheme(data);
-        if (reponse.result.n !== 1 && reponse.result.ok !== 1) {
-            return res.json({ type: "erreur", message: "Erreur lors de la création du thème" })
+        try {
+            await Validation(data, rules)
+            const reponse = await themeClass.createTheme(data);
+            if (reponse.result.n !== 1 && reponse.result.ok !== 1) {
+                return res.json({ type: "erreur", message: "Erreur lors de la création du thème" })
+            }
+            return res.status(200).json(reponse.ops[0]);
+        } catch (e) {
+            return res.status(422).json({ errors: e });
         }
-        return res.status(200).json(reponse.ops[0]);
     })
 
     // Sélectionner tous les thèmes avec pagination
 
     app.get("/api/themes/all", async (req, res) => {
         const data = req.query
-        const v = new Validator(data, {
-           limit: 'required|integer',
-           page: 'required|integer'
-
-       })
-       const matched = await v.check();
-   
-       if (!matched) {
-           return res.status(422).json(v.errors);
-       }
-
-        let reponse = await themeClass.getAllThemes();
-        const NumberOfPages = Math.ceil(reponse.length / data.limit);
-        if(data.page > NumberOfPages) {
-            data.page = NumberOfPages
+        const rules = {
+            limit: 'required|integer',
+            page: 'required|integer'
         }
-        const IndexMax = data.page * data.limit;
-        const IndexMin = IndexMax - data.limit;
-        const infos = {}
-        infos.totalPages = NumberOfPages
-        infos.currentPage = parseInt(data.page, 10)
-        infos.elementsPerPage = parseInt(data.limit, 10)
-        reponse = reponse.slice(IndexMin, IndexMax);
-        return res.json({...infos, allThemes: reponse});
+        try {
+            await Validation(data, rules)
+            let reponse = await themeClass.getAllThemes();
+            const { infos, elements } = Paginate(reponse, data.limit, data.page)
+            return res.json({ ...infos, allThemes: elements });
+        } catch (e) {
+            return res.status(422).json({ errors: e });
+        }
     })
 
     // Sélectionner tous les thèmes sans pagination
@@ -83,46 +72,45 @@ const themes = (app, db) => {
     app.put('/api/themes/:_id', async (req, res) => {
         const data = req.body;
         data._id = req.params._id;
-        const v = new Validator(data, {
+        const rules = {
             _id: 'required|string|checkObjectid',
             theme: 'required|string'
-        })
-
-        const matched = await v.check();
-
-        if (!matched) {
-            return res.status(422).json({errors: v.errors});
         }
-        const reponse = await themeClass.editTheme(data._id, data.theme)
-        if(reponse == null) {
-            return res.status(422).json({errors: {message: 'Une erreur est survenue'}})
+
+        try {
+            await Validation(data, rules)
+            const reponse = await themeClass.editTheme(data._id, data.theme)
+            if (reponse == null) {
+                return res.status(422).json({ errors: { message: 'Une erreur est survenue' } })
+            }
+            return res.status(200).json(reponse);
+        } catch (e) {
+            return res.status(422).json({ errors: v.errors });
         }
-        return res.status(200).json(reponse);
     })
 
-    app.post('/api/themes/search', async(req, res) => {
+    app.post('/api/themes/search', async (req, res) => {
         const theme = req.body.theme
         const themes = await themeClass.searchTheme(theme)
         return res.status(200).json(themes)
     })
 
-    app.delete('/api/themes/:_id', async(req, res) => {
+    app.delete('/api/themes/:_id', async (req, res) => {
         const data = req.params;
-        const v = new Validator(data, {
+        const rules = {
             _id: 'required|string|checkObjectid'
-        })
-
-        const matched = await v.check();
-
-        if (!matched) {
-            return res.status(422).json(v.errors);
         }
 
-        const reponse = await themeClass.deleteTheme(data._id);
-        if(reponse.result.n != 1) {
-            return res.status(422).json({type: 'error', message: "Le thème n'existe pas"})
+        try {
+            await Validation(data, rules)
+            const reponse = await themeClass.deleteTheme(data._id);
+            if (reponse.result.n != 1) {
+                return res.status(422).json({ type: 'error', message: "Le thème n'existe pas" })
+            }
+            return res.status(200).json({ type: 'success', message: "Le thème a été supprimé" })
+        } catch (e) {
+            return res.status(422).json({ errors: v.errors });
         }
-        return res.status(200).json({type: 'success', message: "Le thème a été supprimé"})
     })
 }
 
