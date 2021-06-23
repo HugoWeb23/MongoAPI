@@ -94,12 +94,12 @@ const users = (app, db) => {
         }
         passport.authenticate('local', { session: false }, (err, user) => {
             if (err || !user) {
-                return res.status(422).json({ globalError: { message: 'Adresse e-mail ou mot de passe incorrect' } })
+                return res.status(422).json({ globalErrors: [{ message: 'Adresse e-mail ou mot de passe incorrect' }] })
             }
 
             req.login(user, { session: false }, (err) => {
                 if (err) {
-                    res.status(422).json({ globalError: { message: 'Adresse e-mail ou mot de passe incorrect' } })
+                    res.status(422).json({ globalErrors: [{ message: 'Adresse e-mail ou mot de passe incorrect' }] })
                 }
                 delete user.pass;
                 const { _id } = user
