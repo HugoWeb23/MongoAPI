@@ -7,6 +7,7 @@ class User {
     }
 
     async createUser(data) {
+        console.log('updateValues');
         const user = await this.userCollection.insertOne(data);
         return user;
     }
@@ -57,16 +58,14 @@ class User {
     }
 
     async updateUser(user) {
+        let updateValues = {'nom': user.nom, 'prenom': user.prenom, 'email': user.email}
+        user.pass && (updateValues = {...updateValues, 'pass': user.pass})
+        user.admin != undefined && (updateValues = {...updateValues, 'admin': user.admin})
         const { value } = await this.userCollection.findOneAndUpdate({
             _id: ObjectID(user._id)
         },
             {
-                $set: {
-                    'nom': user.nom,
-                    'prenom': user.prenom,
-                    'email': user.email,
-                    'admin': user.admin
-                }
+                $set: updateValues
             },
             {
                 returnOriginal: false

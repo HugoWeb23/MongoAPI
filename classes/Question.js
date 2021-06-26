@@ -101,8 +101,7 @@ class Question {
         data.type &&= data.type.map(t => parseInt(t, 10))
         data.theme && (search.themeId = { $in: data.theme })
         data.type && (search.type = {$in: data.type})
-        data.text && (search.question = {'$regex': data.text})
-    
+        data.text && (search = {...search, $or: [{question: {'$regex': data.text}}, {reponse: {'$regex': data.text}}, {intitule: {'$regex': data.text}}]})
         Object.keys(search).length > 0 ? rules.unshift({$match: search}) : null
         const result = await this.questionCollection.aggregate(rules).toArray();
         return result;

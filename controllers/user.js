@@ -180,18 +180,23 @@ const users = (app, db) => {
 
     app.put('/api/user', async (req, res) => {
         const data = req.body
-        console.log(data);
         const rules = {
             _id: 'required|checkObjectid',
             nom: 'required|string',
             prenom: 'required|string',
             email: 'required|email|checkUpdateEmail:nom',
-            admin: 'required|boolean'
+            pass: 'string',
+            admin: 'boolean'
         }
         try {
             await Validation(data, rules)
-            data.admin = data.admin === 'true'
+           if((data._id != req.user._id) && (req.user.admin == false)) {
+               return res.status(422).json({ globalErrors: [{ message: "Vous n'avez pas la permission d'effectuer cette action" }] })
+           }
+            data.admin && (data.admin = data.admin === 'true')
+            data.pass && (data.pass = await bcrypt.hash(data.pass, 10));
             const user = await userClass.updateUser(data);
+            delete user.pass
             return res.status(200).json(user);
         } catch (e) {
             return res.status(422).json({errors: e})
