@@ -125,9 +125,13 @@ class Question {
         return result;
     }
 
-    async getQuestionsByThemes(themes) {
+    async getQuestionsByThemes(themes, types) {
+        const rules = {
+            themeId: { $in: themes }
+        }
+        types && (rules.type = { $in: types})
         const result = await this.questionCollection.aggregate([
-            { $match: { themeId: { $in: themes } } },
+            { $match: rules },
             {
                 $lookup:
                 {
