@@ -155,7 +155,7 @@ const questions = (app, db) => {
         const v = new Validator(data, {
             themes: 'required|array',
             'themes.*': 'checkObjectid',
-            types: 'integer|array'
+            types: 'array'
         })
 
         const matched = await v.check();
@@ -163,6 +163,7 @@ const questions = (app, db) => {
         if (!matched) {
             return res.status(422).json(v.errors);
         }
+        data.types = data.types.map(t => parseInt(t))
         data.types.length === 0 && (data.types = undefined)
         data.themes = data.themes.map(t => new ObjectID(t));
         const reponse = await questionClass.getQuestionsByThemes(data.themes, data.types);
