@@ -50,7 +50,8 @@ const questions = (app, db) => {
             question: 'required|string',
             reponse: 'requiredIf:type,1|string', // Obligatoire si le type de la question vaut 1
             propositions: 'requiredIf:type,2|array', // Obligatoire si le type de la question vaut 2
-            'propositions.*.proposition': 'requiredIf:type,2|string'
+            'propositions.*.proposition': 'requiredIf:type,2|string',
+            'propositions.*.correcte': 'requiredIf:type,2|boolean'
         })
 
         const matched = await v.check();
@@ -93,7 +94,8 @@ const questions = (app, db) => {
             question: 'required|string',
             reponse: 'requiredIf:type,1|string', // Obligatoire si le type de la question vaut 1
             propositions: 'requiredIf:type,2|array', // Obligatoire si le type de la question vaut 2
-            'propositions.*.proposition': 'requiredIf:type,2|string'
+            'propositions.*.proposition': 'requiredIf:type,2|string',
+            'propositions.*.correcte': 'requiredIf:type,2|boolean'
         })
 
         const matched = await v.check();
