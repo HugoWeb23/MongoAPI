@@ -154,10 +154,10 @@ class Question {
                 throw "La question n'existe pas"
             }
             const reponse = question.reponse
-            data.correcte = data.reponseEcrite.toLowerCase() === reponse;
+            data.correcte = data.reponseEcrite.toLowerCase() === reponse.toLowerCase();
             // Enregistrement de la réponse dans la partie
             await this.partClasse.updatePart(data, data.type);
-            return data.reponseEcrite.toLowerCase() === reponse;
+            return data.reponseEcrite.toLowerCase() === reponse.toLowerCase();
         } else if (data.type === 2) {
             const question = await this.questionCollection.aggregate([
                 { $match: { _id: ObjectID(data.id_question) } },
