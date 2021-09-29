@@ -213,7 +213,7 @@ const questions = (app, db) => {
             return res.status(422).json(v.errors);
         }
         data.type = parseInt(data.type, 10);
-        data.reponseEcrite ? data.reponseEcrite = data.reponseEcrite.toLowerCase() : null;
+        data.reponseEcrite ? data.reponseEcrite = data.reponseEcrite : null;
         try {
             const reponse = await questionClass.checkReply(data);
             return res.json({ isCorrect: reponse });
