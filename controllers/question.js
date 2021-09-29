@@ -165,9 +165,9 @@ const questions = (app, db) => {
         if (!matched) {
             return res.status(422).json(v.errors);
         }
-        data.types &= data.types.map(t => parseInt(t))
+        data.types &&= data.types.map(t => parseInt(t))
         data.types.length === 0 && (data.types = undefined)
-        data.themes &= data.themes.map(t => new ObjectID(t));
+        data.themes &&= data.themes.map(t => new ObjectID(t));
         const reponse = await questionClass.getQuestionsByThemes(data.themes, data.types);
         return res.status(200).json(reponse);
     })
