@@ -48,7 +48,7 @@ const questions = (app, db) => {
             intitule: 'required|string',
             themeId: 'required|string|checkObjectid', // checkObjectid: vérifie si un ObjectID est valide
             question: 'required|string',
-            reponse: 'requiredIf:type,1|string', // Obligatoire si le type de la question vaut 1
+            reponses: 'requiredIf:type,1|array', // Obligatoire si le type de la question vaut 1
             propositions: 'requiredIf:type,2|array', // Obligatoire si le type de la question vaut 2
             'propositions.*.proposition': 'requiredIf:type,2|string',
             'propositions.*.correcte': 'requiredIf:type,2|boolean'
@@ -92,7 +92,7 @@ const questions = (app, db) => {
             intitule: 'required|string',
             themeId: 'required|string|checkObjectid', // checkObjectid: vérifie si un ObjectID est valide
             question: 'required|string',
-            reponse: 'requiredIf:type,1|string', // Obligatoire si le type de la question vaut 1
+            reponses: 'requiredIf:type,1|array', // Obligatoire si le type de la question vaut 1
             propositions: 'requiredIf:type,2|array', // Obligatoire si le type de la question vaut 2
             'propositions.*.proposition': 'requiredIf:type,2|string',
             'propositions.*.correcte': 'requiredIf:type,2|boolean'
@@ -110,7 +110,7 @@ const questions = (app, db) => {
         if (data.type === 1) {
             delete data.propositions;
         } else if (data.type === 2) {
-            delete data.reponse;
+            delete data.reponses;
         }
 
         if (data.propositions) {
@@ -218,6 +218,7 @@ const questions = (app, db) => {
             const reponse = await questionClass.checkReply(data);
             return res.json({ isCorrect: reponse });
         } catch (e) {
+            console.log(e)
             return res.json({ erreur: e });
         }
 

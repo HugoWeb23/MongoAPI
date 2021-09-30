@@ -28,9 +28,8 @@ const questionConstraints = async (db) => {
                         bsonType: "string",
                         description: "La question",
                     },
-                    reponse: {
-                        bsonType: "string",
-                        description: "La réponse de la question"
+                    reponses: {
+                        bsonType: "array"
                     },
                     propositions: {
                         bsonType: "array",
@@ -54,7 +53,7 @@ const questionConstraints = async (db) => {
     }
     });
     // Insertion des questions par défaut
-    db.collection(collectionName).insertMany(defaultQuestions);
+    //db.collection(collectionName).insertMany(defaultQuestions);
 };
 
 module.exports = questionConstraints;

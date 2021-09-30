@@ -29,18 +29,18 @@ class Question {
     }
 
     async updateQuestion(data) {
-        const { _id, type, intitule, themeId, question, reponse = null, propositions } = data;
+        const { _id, type, intitule, themeId, question, reponses = null, propositions } = data;
         const updateValues = {
             type,
             intitule,
             themeId,
             question
         }
-        reponse != null ? updateValues.reponse = reponse : null;
+        reponses != null ? updateValues.reponses = reponses : null;
 
         const unsetValues = {}
         type === 1 ? unsetValues.propositions = "" : null;
-        type === 2 ? unsetValues.reponse = "" : null;
+        type === 2 ? (unsetValues.reponses = "") : null;
 
         await this.questionCollection.findOneAndUpdate({
             _id: ObjectID(_id)
@@ -153,11 +153,11 @@ class Question {
             if (question === null) {
                 throw "La question n'existe pas"
             }
-            const reponse = question.reponse
-            data.correcte = data.reponseEcrite.toLowerCase() === reponse.toLowerCase();
+            const reponses = question.reponses
+            data.correcte = reponses.map(reponse => reponse.toLowerCase()).includes(data.reponseEcrite.toLowerCase());
             // Enregistrement de la réponse dans la partie
             await this.partClasse.updatePart(data, data.type);
-            return data.reponseEcrite.toLowerCase() === reponse.toLowerCase();
+            return data.correcte;
         } else if (data.type === 2) {
             const question = await this.questionCollection.aggregate([
                 { $match: { _id: ObjectID(data.id_question) } },
