@@ -63,9 +63,9 @@ const questions = (app, db) => {
         data.type = parseInt(data.type, 10);
         data.themeId = new ObjectID(data.themeId);
 
-        if (data.type === 1) {
+        if (data.type === 1 || data.type === "1") {
             delete data.propositions;
-        } else if (data.type === 2) {
+        } else if (data.type === 2 || data.type === "2") {
             delete data.reponse;
         }
 
