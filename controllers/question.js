@@ -66,7 +66,7 @@ const questions = (app, db) => {
         if (data.type === 1 || data.type === "1") {
             delete data.propositions;
         } else if (data.type === 2 || data.type === "2") {
-            delete data.reponse;
+            delete data.reponses;
         }
 
         if (data.propositions) {
